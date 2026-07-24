@@ -1,0 +1,33 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Data directories (keep directory structure via .gitkeep, ignore raw image binaries)
+data/raw/*
+!data/raw/.gitkeep
+
+data/processed/kermany/
+data/processed/pulmonary_abnormalities/
+data/processed/manifest.csv
+
+# Models & Checkpoints
+results/checkpoints/*.pt
+results/checkpoints/*.pth
+*.onnx
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+__MACOSX/
+*.log
+
+# Credentials
+kaggle.json

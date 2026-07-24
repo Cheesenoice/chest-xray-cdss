@@ -1,0 +1,94 @@
+<div style="padding: 1rem 0;">
+<h2 class="sr-only">Mockup of a chest X-ray AI screening tool: an uploaded X-ray with a Grad-CAM heatmap on the left, and a diagnosis panel with class probabilities and a triage recommendation on the right.</h2>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 12px; border-bottom: 0.5px solid var(--border);">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--bg-accent); display: flex; align-items: center; justify-content: center; color: var(--text-accent);"><i class="ti ti-lungs" style="font-size:18px" aria-hidden="true"></i></div>
+    <div>
+      <p style="font-weight: 500; font-size: 15px; margin: 0;">ChestScreen AI</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Chest X-ray decision support</p>
+    </div>
+  </div>
+  <span style="font-size: 12px; color: var(--text-secondary); background: var(--surface-1); padding: 4px 10px; border-radius: var(--radius);"><i class="ti ti-clock" style="font-size:13px; vertical-align:-2px; margin-right:4px" aria-hidden="true"></i>0.42s</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px;">
+
+  <div style="background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 12px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+      <span style="font-size: 13px; font-weight: 500;">Grad-CAM overlay</span>
+      <span style="font-size: 11px; color: var(--text-muted);">patient_00417.png</span>
+    </div>
+    <div style="position: relative; border-radius: 8px; overflow: hidden; background: #0b0b0b; aspect-ratio: 1;">
+      <svg viewBox="0 0 200 200" style="width:100%; height:100%; display:block;" role="img" aria-label="Chest X-ray with heatmap">
+        <rect width="200" height="200" fill="#111"/>
+        <ellipse cx="100" cy="150" rx="70" ry="45" fill="#2a2a2a"/>
+        <rect x="94" y="30" width="12" height="120" rx="6" fill="#3a3a3a"/>
+        <path d="M60 55 Q45 100 55 145 Q80 150 88 145 L88 55 Z" fill="#242424"/>
+        <path d="M140 55 Q155 100 145 145 Q120 150 112 145 L112 55 Z" fill="#242424"/>
+        <ellipse cx="70" cy="110" rx="26" ry="30" fill="#e24b4a" opacity="0.55"/>
+        <ellipse cx="70" cy="110" rx="16" ry="19" fill="#ef9f27" opacity="0.6"/>
+        <ellipse cx="70" cy="110" rx="8" ry="10" fill="#facd75" opacity="0.7"/>
+      </svg>
+      <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.6); border-radius: 6px; padding: 4px 8px; display: flex; align-items: center; gap: 6px;">
+        <span style="width:10px; height:10px; border-radius:2px; background:#e24b4a;"></span>
+        <span style="font-size: 10px; color: #fff;">high activation</span>
+      </div>
+    </div>
+    <p style="font-size: 11px; color: var(--text-muted); margin: 8px 0 0;">Model attends to the lower-left lung field</p>
+  </div>
+
+  <div>
+    <div style="background: var(--bg-danger); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;">
+      <p style="font-size: 12px; color: var(--text-danger); margin: 0 0 2px;">Predicted class</p>
+      <p style="font-size: 20px; font-weight: 500; color: var(--text-danger); margin: 0;">Bacterial pneumonia</p>
+      <p style="font-size: 12px; color: var(--text-danger); margin: 4px 0 0;"><i class="ti ti-alert-triangle" style="font-size:13px; vertical-align:-2px; margin-right:4px" aria-hidden="true"></i>Priority: urgent referral</p>
+    </div>
+
+    <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 8px;">Class probabilities</p>
+
+    <div style="margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;"><span>Bacterial pneumonia</span><span style="font-weight:500;">88.4%</span></div>
+      <div style="height:6px; background:var(--surface-1); border-radius:3px;"><div style="height:6px; width:88%; background:#e24b4a; border-radius:3px;"></div></div>
+    </div>
+    <div style="margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;"><span>Viral pneumonia</span><span style="font-weight:500;">7.1%</span></div>
+      <div style="height:6px; background:var(--surface-1); border-radius:3px;"><div style="height:6px; width:7%; background:#ef9f27; border-radius:3px;"></div></div>
+    </div>
+    <div style="margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;"><span>Tuberculosis</span><span style="font-weight:500;">3.0%</span></div>
+      <div style="height:6px; background:var(--surface-1); border-radius:3px;"><div style="height:6px; width:3%; background:#888780; border-radius:3px;"></div></div>
+    </div>
+    <div style="margin-bottom: 12px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;"><span>Normal</span><span style="font-weight:500;">1.5%</span></div>
+      <div style="height:6px; background:var(--surface-1); border-radius:3px;"><div style="height:6px; width:2%; background:#1d9e75; border-radius:3px;"></div></div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button style="flex:1;" onclick="sendPrompt('Giải thích cách sinh báo cáo PDF lâm sàng từ kết quả model')">Export report <span aria-hidden="true">↗</span></button>
+      <button style="flex:1;" onclick="sendPrompt('Cho tôi xem kiến trúc kỹ thuật đầy đủ của hệ thống ChestScreen AI')">View pipeline <span aria-hidden="true">↗</span></button>
+    </div>
+  </div>
+
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap:12px; margin-top:14px;">
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:12px;">
+    <p style="font-size:12px; color:var(--text-secondary); margin:0;">Accuracy</p>
+    <p style="font-size:22px; font-weight:500; margin:2px 0 0;">94.2%</p>
+  </div>
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:12px;">
+    <p style="font-size:12px; color:var(--text-secondary); margin:0;">Macro F1</p>
+    <p style="font-size:22px; font-weight:500; margin:2px 0 0;">0.93</p>
+  </div>
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:12px;">
+    <p style="font-size:12px; color:var(--text-secondary); margin:0;">AUC</p>
+    <p style="font-size:22px; font-weight:500; margin:2px 0 0;">0.97</p>
+  </div>
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:12px;">
+    <p style="font-size:12px; color:var(--text-secondary); margin:0;">Ext. val. AUC</p>
+    <p style="font-size:22px; font-weight:500; margin:2px 0 0;">0.89</p>
+  </div>
+</div>
+
+</div>

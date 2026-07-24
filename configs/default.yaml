@@ -1,0 +1,40 @@
+# Project Configuration
+
+seed: 42
+seeds: [42, 7, 123]
+
+data:
+  num_classes: 4 # 3 (Kermany only) or 4 (+ TB)
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  splits_dir: "data/processed/splits"
+  image_size: 224
+  splits:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  external_sources: ["montgomery"]
+  dedup: true
+  imbalance_strategy: "weighted_sampler" # none | weighted_sampler | class_weights
+  augmentation:
+    horizontal_flip: true
+    rotate_deg: 12
+    brightness_contrast: 0.2
+
+model:
+  backbone: "densenet121" # resnet18 | densenet121 | efficientnet_b0
+  pretrained: true
+  drop_rate: 0.2
+
+train:
+  batch_size: 32
+  num_workers: 2
+  epochs: 15
+  lr: 0.0001
+  weight_decay: 0.01
+  scheduler: "cosine" # cosine | plateau | none
+  early_stopping_patience: 5
+  use_amp: true
+
+explainability:
+  gradcam_target_layer: "features.denseblock4"
