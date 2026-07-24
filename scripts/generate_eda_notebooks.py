@@ -3,7 +3,6 @@ from pathlib import Path
 
 def create_kermany_notebook(output_path):
     nb = nbf.v4.new_notebook()
-    
     cells = []
     
     # Title Markdown
@@ -72,7 +71,7 @@ for p in raw_images:
         else:
             label = "bacterial_pneumonia"
         
-        m = re.search(r"person(\d+)", fn, re.IGNORECASE)
+        m = re.search(r"person(\\d+)", fn, re.IGNORECASE)
         patient_id = f"person{m.group(1)}" if m else f"kermany_pneu_{p.stem}"
     else:
         continue
@@ -101,7 +100,7 @@ Let's visualize the balance between `Normal`, `Bacterial Pneumonia`, and `Viral 
 # Bar Chart
 class_counts = df['label'].value_counts()
 colors = ['#2b5c8f', '#d95f02', '#7570b3']
-sns.barplot(x=class_counts.index, y=class_counts.values, ax=axes[0], palette=colors)
+sns.barplot(x=class_counts.index, y=class_counts.values, ax=axes[0], hue=class_counts.index, palette=colors, legend=False)
 axes[0].set_title("Image Count by Class", fontsize=14, fontweight='bold')
 axes[0].set_ylabel("Number of Images")
 for i, v in enumerate(class_counts.values):
@@ -169,7 +168,8 @@ for row_idx, label in enumerate(['normal', 'bacterial_pneumonia', 'viral_pneumon
         img_path = samples.iloc[col_idx]['filepath']
         img = Image.open(img_path).convert('L')
         ax.imshow(img, cmap='gray')
-        ax.set_title(f"{label.upper()}\nPatient: {samples.iloc[col_idx]['patient_id']}", fontsize=10)
+        pid = samples.iloc[col_idx]['patient_id']
+        ax.set_title(f"{label.upper()} \\n Patient: {pid}", fontsize=10)
         ax.axis('off')
 
 plt.suptitle("Representative Pediatric Chest X-Rays by Diagnosis", fontsize=16, fontweight='bold', y=0.98)
@@ -351,7 +351,8 @@ for i, label in enumerate(['normal', 'tuberculosis']):
         ax = axes[i, j]
         img = Image.open(samples.iloc[j]['filepath']).convert('L')
         ax.imshow(img, cmap='gray')
-        ax.set_title(f"SHENZHEN | {label.upper()}\nPatient: {samples.iloc[j]['patient_id']}", fontsize=9)
+        pid = samples.iloc[j]['patient_id']
+        ax.set_title(f"SHENZHEN | {label.upper()} \\n Patient: {pid}", fontsize=9)
         ax.axis('off')
 
 # Montgomery TB vs Normal
@@ -361,7 +362,8 @@ for i, label in enumerate(['normal', 'tuberculosis']):
         ax = axes[i, j + 2]
         img = Image.open(samples.iloc[j]['filepath']).convert('L')
         ax.imshow(img, cmap='gray')
-        ax.set_title(f"MONTGOMERY | {label.upper()}\nPatient: {samples.iloc[j]['patient_id']}", fontsize=9)
+        pid = samples.iloc[j]['patient_id']
+        ax.set_title(f"MONTGOMERY | {label.upper()} \\n Patient: {pid}", fontsize=9)
         ax.axis('off')
 
 plt.suptitle("Adult Chest X-Rays: Normal vs Tuberculosis (Shenzhen & Montgomery)", fontsize=15, fontweight='bold')
@@ -434,7 +436,7 @@ print(f"Manifest total unique images: {len(df_manifest)}")
 
 # By Label
 label_counts = df_manifest['label'].value_counts()
-sns.barplot(x=label_counts.index, y=label_counts.values, ax=axes[0], palette="Blues_r")
+sns.barplot(x=label_counts.index, y=label_counts.values, ax=axes[0], hue=label_counts.index, palette="Blues_r", legend=False)
 axes[0].set_title("Overall Manifest Image Count by Diagnosis Label", fontsize=13, fontweight='bold')
 axes[0].tick_params(axis='x', rotation=15)
 for p in axes[0].patches:
@@ -442,7 +444,7 @@ for p in axes[0].patches:
 
 # By Source
 source_counts = df_manifest['source'].value_counts()
-sns.barplot(x=source_counts.index, y=source_counts.values, ax=axes[1], palette="Dark2")
+sns.barplot(x=source_counts.index, y=source_counts.values, ax=axes[1], hue=source_counts.index, palette="Dark2", legend=False)
 axes[1].set_title("Image Count by Dataset Source", fontsize=13, fontweight='bold')
 for p in axes[1].patches:
     axes[1].annotate(f"{int(p.get_height())}", (p.get_x() + p.get_width() / 2., p.get_height() + 30), ha='center', fontweight='bold')
@@ -482,11 +484,15 @@ img_ped = Image.open(pediatric_sample['filepath']).convert('L')
 img_adult = Image.open(adult_sample['filepath']).convert('L')
 
 axes[0].imshow(img_ped, cmap='gray')
-axes[0].set_title(f"PEDIATRIC DOMAIN ({pediatric_sample['source'].upper()})\nLabel: {pediatric_sample['label']}", fontsize=12, fontweight='bold')
+ped_source = pediatric_sample['source'].upper()
+ped_label = pediatric_sample['label']
+axes[0].set_title(f"PEDIATRIC DOMAIN ({ped_source}) \\n Label: {ped_label}", fontsize=12, fontweight='bold')
 axes[0].axis('off')
 
 axes[1].imshow(img_adult, cmap='gray')
-axes[1].set_title(f"ADULT DOMAIN ({adult_sample['source'].upper()})\nLabel: {adult_sample['label']}", fontsize=12, fontweight='bold')
+adult_source = adult_sample['source'].upper()
+adult_label = adult_sample['label']
+axes[1].set_title(f"ADULT DOMAIN ({adult_source}) \\n Label: {adult_label}", fontsize=12, fontweight='bold')
 axes[1].axis('off')
 
 plt.suptitle("Domain Confound Visualization: Pediatric vs Adult Chest Geometry", fontsize=15, fontweight='bold')
