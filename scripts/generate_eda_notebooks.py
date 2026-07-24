@@ -178,25 +178,33 @@ plt.show()
 """))
 
     # Step 5: Pixel Intensity Distributions
-    cells.append(nbf.v4.new_markdown_cell("""## 5. Pixel Intensity & Mean Heatmap Analysis
+    cells.append(nbf.v4.new_markdown_cell("""## 5. Pixel Intensity Distribution Analysis (Fast Histograms)
 
-Comparing pixel intensity distributions across classes.
+Comparing average pixel intensity distributions across classes.
 """))
 
     cells.append(nbf.v4.new_code_cell("""plt.figure(figsize=(10, 5))
 
+bins = np.arange(257)
+bin_centers = (bins[:-1] + bins[1:]) / 2
+
 for label, color in zip(['normal', 'bacterial_pneumonia', 'viral_pneumonia'], ['#2b5c8f', '#d95f02', '#7570b3']):
-    sample_paths = df[df['label'] == label]['filepath'].sample(200, random_state=42)
-    pixels = []
+    sample_paths = df[df['label'] == label]['filepath'].sample(min(150, len(df[df['label'] == label])), random_state=42)
+    hists = []
     for p in sample_paths:
         img = np.array(Image.open(p).convert('L').resize((224, 224)))
-        pixels.extend(img.flatten())
-    sns.kdeplot(pixels, label=label, color=color, linewidth=2)
+        counts, _ = np.histogram(img, bins=bins)
+        hists.append(counts / counts.sum()) # normalize
+    
+    avg_hist = np.mean(hists, axis=0)
+    plt.plot(bin_centers, avg_hist, label=label, color=color, linewidth=2.5)
 
-plt.title("Pixel Intensity Histogram by Class (Resized 224x224)", fontsize=14, fontweight='bold')
-plt.xlabel("Pixel Value (0-255)")
-plt.ylabel("Density")
+plt.title("Normalized Mean Pixel Intensity Distribution by Class", fontsize=14, fontweight='bold')
+plt.xlabel("Pixel Value (0 = Dark, 255 = Bright)")
+plt.ylabel("Normalized Frequency")
+plt.xlim(0, 255)
 plt.legend()
+plt.tight_layout()
 plt.show()
 """))
 
