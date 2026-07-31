@@ -1,33 +1,39 @@
-# Virtual Environment
-.venv/
-env/
-venv/
-
-# Python cache
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
 
-# Data directories (keep directory structure via .gitkeep, ignore raw image binaries)
-data/raw/*
+# Data (never commit raw or processed images/checkpoints)
+data/raw/
+data/processed/*
 !data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/processed/manifest.csv
+!data/processed/splits/
+!data/processed/splits/*.csv
+!data/processed/splits/split_report.md
+!data/processed/splits_kermany3/
+!data/processed/splits_kermany3/*.csv
+!data/processed/splits_kermany3/split_report.md
 
-data/processed/kermany/
-data/processed/pulmonary_abnormalities/
-data/processed/manifest.csv
+# Model checkpoints and large result artifacts
+results/checkpoints/
+*.pt
+*.pth
+*.ckpt
 
-# Models & Checkpoints
-results/checkpoints/*.pt
-results/checkpoints/*.pth
-*.onnx
+# Jupyter
+.ipynb_checkpoints/
 
-# IDE & OS
-.vscode/
-.idea/
+# OS / editor
 .DS_Store
-__MACOSX/
-*.log
+Thumbs.db
+.vscode/
+scratch/
 
-# Credentials
+# Kaggle credentials (never commit)
 kaggle.json

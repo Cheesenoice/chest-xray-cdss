@@ -13,17 +13,19 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = False
     os.environ["PYTHONHASHSEED"] = str(seed)
 
-def compute_metrics(y_true, y_pred, y_prob, num_classes=4):
+def compute_metrics(y_true, y_pred, y_prob, num_classes=None):
     acc = accuracy_score(y_true, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="macro", zero_division=0)
     
-    # Calculate AUC (One-vs-Rest)
+    # Calculate AUC on classes actually present in y_true
+    present = np.unique(y_true)
     try:
-        if num_classes == 2:
-            auc = roc_auc_score(y_true, y_prob[:, 1])
+        if len(present) == 2:
+            auc = roc_auc_score(y_true, y_prob[:, present[1]])
         else:
-            auc = roc_auc_score(y_true, y_prob, multi_class="ovr", average="macro")
+            auc = roc_auc_score(y_true, y_prob[:, present], multi_class="ovr", average="macro")
     except Exception as e:
+        print(f"[WARN] AUC computation failed: {e}")
         auc = 0.0
 
     return {

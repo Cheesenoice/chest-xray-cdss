@@ -6,7 +6,7 @@ import yaml
 from pathlib import Path
 
 def download_datasets(config_path="configs/default.yaml"):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     
     raw_dir = Path(cfg["data"]["raw_dir"])

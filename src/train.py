@@ -4,7 +4,7 @@ import argparse
 import yaml
 import torch
 import torch.nn as nn
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
 from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
@@ -26,7 +26,7 @@ def train_epoch(model, loader, criterion, optimizer, scaler, device, use_amp=Tru
         optimizer.zero_grad()
 
         if use_amp and device.type == "cuda":
-            with autocast():
+            with autocast(device.type):
                 outputs = model(images)
                 loss = criterion(outputs, targets)
             scaler.scale(loss).backward()
@@ -77,11 +77,13 @@ def evaluate_model(model, loader, criterion, device, max_batches=None):
     metrics["loss"] = epoch_loss
     return metrics
 
-def run_training(config_path="configs/default.yaml", dry_run=False):
-    with open(config_path, "r") as f:
+def run_training(config_path="configs/default.yaml", dry_run=False, backbone_override=None, seed_override=None):
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    seed = cfg.get("seed", 42)
+    if backbone_override is not None:
+        cfg["model"]["backbone"] = backbone_override
+    seed = seed_override if seed_override is not None else cfg.get("seed", 42)
     set_seed(seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -109,7 +111,7 @@ def run_training(config_path="configs/default.yaml", dry_run=False):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=float(cfg["train"]["lr"]), weight_decay=float(cfg["train"].get("weight_decay", 0.01)))
-    scaler = GradScaler(enabled=cfg["train"].get("use_amp", True) and device.type == "cuda")
+    scaler = GradScaler(device.type, enabled=cfg["train"].get("use_amp", True) and device.type == "cuda")
 
     epochs = cfg["train"]["epochs"] if not dry_run else 1
     best_f1 = 0.0
@@ -118,7 +120,9 @@ def run_training(config_path="configs/default.yaml", dry_run=False):
 
     save_dir = Path("results/checkpoints")
     save_dir.mkdir(parents=True, exist_ok=True)
-    best_ckpt_path = save_dir / f"best_{cfg['model']['backbone']}_seed{seed}.pt"
+    # Tên checkpoint phân biệt theo backbone, seed và số lớp (3/4 class)
+    # để các benchmark chạy song song không ghi đè lẫn nhau.
+    best_ckpt_path = save_dir / f"best_{cfg['model']['backbone']}_seed{seed}_cls{num_classes}.pt"
 
     max_b = 5 if dry_run else None
     print(f"[INFO] Starting training for {epochs} epochs...")
@@ -166,5 +170,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/default.yaml")
     parser.add_argument("--dry-run", action="store_true", help="Run 1 epoch with small batch for testing")
+    parser.add_argument("--backbone", default=None, help="Override backbone name")
+    parser.add_argument("--seed", type=int, default=None, help="Override random seed")
     args = parser.parse_args()
-    run_training(args.config, dry_run=args.dry_run)
+    run_training(args.config, dry_run=args.dry_run, backbone_override=args.backbone, seed_override=args.seed)

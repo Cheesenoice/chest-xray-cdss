@@ -70,9 +70,16 @@ def parse_pulmonary(raw_dir):
         print(f"[WARN] Pulmonary abnormalities directory {pulm_dir} does not exist.")
         return records
 
+    # Only scan CXR_png/ directories for actual X-ray images. Montgomery also
+    # contains a ManualMask/{leftMask,rightMask}/ sibling tree with lung
+    # segmentation masks that share the same MCUCXR_{id}_{label}.png filename
+    # pattern as real X-rays -- an unrestricted rglob would misparse those
+    # masks as chest X-ray images with the wrong content but a "valid" label.
     image_paths = [
-        p for p in list(pulm_dir.rglob("*.png")) + list(pulm_dir.rglob("*.jpg")) + list(pulm_dir.rglob("*.jpeg"))
-        if "__MACOSX" not in str(p) and not p.name.startswith("._")
+        p for p in pulm_dir.rglob("*.png")
+        if p.parent.name == "CXR_png"
+        and "__MACOSX" not in str(p)
+        and not p.name.startswith("._")
     ]
     print(f"[INFO] Parsing {len(image_paths)} Pulmonary Abnormalities images...")
 
@@ -110,7 +117,7 @@ def parse_pulmonary(raw_dir):
     return records
 
 def prepare_manifest(config_path="configs/default.yaml"):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     raw_dir = Path(cfg["data"]["raw_dir"])

@@ -1,29 +1,31 @@
-# Project Configuration
+# 3-Class Clean Benchmark — Kermany only (Normal / Bacterial / Viral)
+# Chỉ dùng nguồn Kermany để có benchmark sạch nhất, không bị domain confound TB.
+# Đây là kết quả chính trong paper. Config 4-class = configs/default.yaml.
 
 seed: 42
 seeds: [42, 7, 123]
 backbones: ["resnet18", "densenet121", "efficientnet_b0"]
 
 data:
-  num_classes: 4 # 3 (Kermany only) or 4 (+ TB)
+  num_classes: 3
   raw_dir: "data/raw"
   processed_dir: "data/processed"
-  splits_dir: "data/processed/splits"
+  splits_dir: "data/processed/splits_kermany3"
   image_size: 224
   splits:
     train: 0.70
     val: 0.15
     test: 0.15
-  external_sources: ["montgomery"]
+  external_sources: []
   dedup: true
-  imbalance_strategy: "weighted_sampler" # none | weighted_sampler | class_weights
+  imbalance_strategy: "weighted_sampler"
   augmentation:
     horizontal_flip: true
     rotate_deg: 12
     brightness_contrast: 0.2
 
 model:
-  backbone: "densenet121" # resnet18 | densenet121 | efficientnet_b0
+  backbone: "densenet121"
   pretrained: true
   drop_rate: 0.2
 
@@ -33,7 +35,7 @@ train:
   epochs: 15
   lr: 0.0001
   weight_decay: 0.01
-  scheduler: "cosine" # cosine | plateau | none
+  scheduler: "cosine"
   early_stopping_patience: 5
   use_amp: true
 

@@ -5,7 +5,7 @@ from pathlib import Path
 from sklearn.model_selection import GroupShuffleSplit
 
 def create_splits(config_path="configs/default.yaml"):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     processed_dir = Path(cfg["data"]["processed_dir"])
@@ -87,7 +87,10 @@ def create_splits(config_path="configs/default.yaml"):
     train_df.to_csv(splits_dir / "train.csv", index=False)
     val_df.to_csv(splits_dir / "val.csv", index=False)
     test_df.to_csv(splits_dir / "test.csv", index=False)
-    ext_df.to_csv(splits_dir / "external_test.csv", index=False)
+    if len(ext_df) > 0:
+        ext_df.to_csv(splits_dir / "external_test.csv", index=False)
+    elif (splits_dir / "external_test.csv").exists():
+        (splits_dir / "external_test.csv").unlink()
 
     print(f"[INFO] Splits saved to {splits_dir}/")
 
@@ -119,4 +122,8 @@ def create_splits(config_path="configs/default.yaml"):
     print(f"[SUCCESS] Wrote split report to {report_path}")
 
 if __name__ == "__main__":
-    create_splits()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="configs/default.yaml")
+    args = parser.parse_args()
+    create_splits(args.config)

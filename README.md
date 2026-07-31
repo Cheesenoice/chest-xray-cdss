@@ -1,104 +1,109 @@
-# Explainable Deep Learning Clinical Decision Support System for Chest X-ray Screening
+# Chest X-ray CDSS — Explainable Deep Learning Clinical Decision Support System
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> **Graduation Thesis Project (2026)**  
-> **Topic (EN):** *An Explainable Deep Learning Clinical Decision Support System for Chest X-ray Screening*  
-> **Topic (VN):** *Hệ thống hỗ trợ sàng lọc và quyết định lâm sàng từ ảnh X-quang ngực bằng học sâu có giải thích.*
+A **reproducible benchmark** comparing multiple deep learning backbones (ResNet-18, DenseNet-121, EfficientNet-B0) for chest X-ray multi-class classification, with Grad-CAM explainability, external validation on held-out sources, and a classical ML baseline (HOG/LBP + SVM).
 
----
+## Table of Contents
 
-## 📌 Project Overview
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Data Pipeline](#data-pipeline)
+- [Training & Evaluation](#training--evaluation)
+- [Results](#results)
+- [Web Demo](#web-demo)
+- [Paper / Citation](#paper--citation)
+- [License & Attribution](#license--attribution)
 
-This repository implements a **reproducible, explainable, and externally-validated deep learning system** for multi-class chest X-ray screening:
-- **Classes Supported:** `Normal`, `Bacterial Pneumonia`, `Viral Pneumonia`, `Tuberculosis (TB)`
-- **Explainability:** Grad-CAM saliency heatmaps overlaid on thoracic regions.
-- **External Validation:** 100% held-out Montgomery dataset for honest generalization benchmarking.
-- **Data Leakage Prevention:** Strict patient-level (`patient_id`) and MD5 hash non-overlap verification across splits.
+## Quick Start
 
----
-
-## 📁 Repository Structure
-
-```text
-chest-xray-cdss/
-├── CLAUDE_EN.md              # Context & master plan document
-├── DATA.md                   # Data pipeline specification
-├── README.md                 # Project README
-├── requirements.txt          # Dependencies
-├── configs/
-│   └── default.yaml          # Hyperparameters, data paths, random seeds
-├── data/
-│   ├── raw/                  # Raw downloaded datasets (.gitkeep)
-│   └── processed/            # Manifest & patient-level split CSVs
-│       └── splits/
-├── src/
-│   ├── data/
-│   │   ├── download.py       # Kaggle dataset downloader
-│   │   ├── prepare.py        # Manifest generator & MD5 deduplication
-│   │   ├── split.py          # Zero-leakage patient-level splitter
-│   │   └── checks.py         # Data quality audit
-│   ├── datasets.py           # PyTorch Dataset & DataLoader
-│   ├── models.py             # Backbone model factory (timm: DenseNet-121, ResNet-18)
-│   ├── train.py              # End-to-end training & evaluation loop
-│   └── utils.py              # Seed management & metric computation
-├── notebooks/                # Publication-grade EDA Jupyter Notebooks
-│   ├── 01_eda_kermany.ipynb
-│   ├── 02_eda_pulmonary.ipynb
-│   └── 03_eda_consolidated.ipynb
-└── results/                  # Split reports and data quality output
-```
-
----
-
-## ⚡ Quick Start
-
-### 1. Setup Virtual Environment
 ```bash
-python -m venv .venv
-# PowerShell:
-.\.venv\Scripts\Activate.ps1
-# Install dependencies:
+# 1. Clone and enter repo
+git clone <repo-url>
+cd chest-xray-cdss
+
+# 2. Install dependencies (CUDA 12.8 for RTX 50-series)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 pip install -r requirements.txt
-```
 
-### 2. Download Datasets
-```bash
+# 3. Download data
 python -m src.data.download
-```
 
-### 3. Data Processing & Leakage Prevention Split
-```bash
+# 4. Prepare manifest + split (patient-level, zero leakage)
 python -m src.data.prepare
 python -m src.data.split
 python -m src.data.checks
-```
 
-### 4. Train Model
-```bash
-# Dry-run test (5 batches):
-python -m src.train --config configs/default.yaml --dry-run
-
-# Full training:
+# 5. Train a baseline model
 python -m src.train --config configs/default.yaml
+
+# 6. Evaluate
+python -m src.evaluate --config configs/default.yaml
+
+# 7. Run all experiments (3 backbones × 3 seeds)
+python -m experiments.run_all
+
+# 8. Launch demo
+streamlit run app/app.py
 ```
 
----
+## Project Structure
 
-## 📊 Dataset Split Summary (Zero Patient Leakage)
+```
+├── configs/          # YAML configuration (hyperparams, data paths, seeds)
+├── src/
+│   ├── data/         # Data pipeline: download → prepare → split → checks
+│   ├── datasets.py   # PyTorch Dataset + augmentation (albumentations)
+│   ├── models.py     # Backbone factory (timm)
+│   ├── train.py      # Training loop (AMP, early stopping, checkpointing)
+│   ├── evaluate.py   # Metrics, bootstrap CI, confusion matrix, ROC curves
+│   ├── explain.py    # Grad-CAM heatmap overlay
+│   ├── baseline_classical.py  # HOG/LBP + SVM/LogReg baseline
+│   └── utils.py      # Seed management, metric computation
+├── experiments/      # Multi-backbone × multi-seed runner
+├── app/              # Streamlit web demo + PDF report generation
+├── notebooks/        # EDA notebooks
+├── results/          # Metric tables, confusion matrices, ROC plots, logs
+├── paper/            # IMRaD outline + figures
+└── model_card.md     # Model card with intended use and limitations
+```
 
-| Split | Normal | Bacterial Pneumonia | Viral Pneumonia | Tuberculosis | Total Images | Unique Patients |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Train** | 1,325 | 1,966 | 1,060 | 235 | **4,586** | 2,740 |
-| **Validation** | 270 | 411 | 226 | 59 | **966** | 587 |
-| **Internal Test** | 310 | 383 | 199 | 42 | **934** | 588 |
-| **External Test (Montgomery)** | 240 | 0 | 0 | 174 | **414** | 138 |
+## Data Pipeline
 
----
+Leakage-free patient-level split with strict assertions:
 
-## 📜 Citations & Licenses
+1. **download.py** — Download Kermany + Shenzhen/Montgomery via Kaggle API
+2. **prepare.py** — Parse filenames → labels + patient IDs, compute MD5, deduplicate
+3. **split.py** — `GroupShuffleSplit` at patient level, hold out Montgomery → external test
+4. **checks.py** — Verify MD5 overlap, dimension stats, domain confound report
 
-- **Kermany et al. 2018:** *Identifying Medical Diagnoses and Treatable Diseases by Image-Based Deep Learning*, Cell. (CC BY 4.0)
-- **Jaeger et al. 2014 & Candemir et al. 2014:** *Shenzhen & Montgomery Chest X-ray Sets*, NLM/NIH.
+## Training & Evaluation
+
+- **Backbones:** ResNet-18, DenseNet-121, EfficientNet-B0 (timm, ImageNet pretrained)
+- **Optimizer:** AdamW (lr=1e-4), cosine scheduler, early stopping
+- **AMP:** Mixed-precision training for speed
+- **Class imbalance:** WeightedRandomSampler
+- **Metrics:** Accuracy, Precision, Recall, F1 (macro), AUC (macro), per-class metrics
+- **Reproducibility:** Mean ± std over 3 seeds + 95% CI bootstrap
+
+## Web Demo
+
+```bash
+streamlit run app/app.py
+```
+
+Upload a chest X-ray → diagnosis probability → Grad-CAM heatmap → triage alert.
+
+## Paper / Citation
+
+See `paper/outline.md` for IMRaD structure. Preprint available at [arXiv/medRxiv link TBD].
+
+## License & Attribution
+
+- Code: MIT License
+- Kermany dataset: CC BY 4.0 ([Kermany et al. 2018](https://doi.org/10.1016/j.cell.2018.02.010))
+- Shenzhen/Montgomery: Public domain (NLM/NIH) — [Jaeger et al. 2014](https://pubmed.ncbi.nlm.nih.gov/24142925/), [Candemir et al. 2014](https://pubmed.ncbi.nlm.nih.gov/24142882/)
+- TB dataset: Rahman et al. — [Reliable Tuberculosis Detection](https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset)
+
+> **Disclaimer:** This system is for clinical decision support and research only. It does NOT replace a physician's diagnosis.

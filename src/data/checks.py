@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 
 def run_data_checks(config_path="configs/default.yaml"):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     results_dir = Path("results")
@@ -44,4 +44,8 @@ def run_data_checks(config_path="configs/default.yaml"):
     print(f"[SUCCESS] Data quality report saved to {out_path}")
 
 if __name__ == "__main__":
-    run_data_checks()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="configs/default.yaml")
+    args = parser.parse_args()
+    run_data_checks(args.config)
