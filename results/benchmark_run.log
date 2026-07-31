@@ -1,0 +1,392 @@
+
+============================================================
+[EXPERIMENT] backbone=resnet18, seed=42, dry_run=False
+============================================================
+[INFO] Training on device: cuda
+[INFO] Starting training for 15 epochs...
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [01/15] | Train Loss: 0.8688 | Train F1: 0.6518 | Val Loss: 0.5960 | Val F1: 0.7720 | Val AUC: 0.9114
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [02/15] | Train Loss: 0.5575 | Train F1: 0.7769 | Val Loss: 0.4914 | Val F1: 0.7935 | Val AUC: 0.9193
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [03/15] | Train Loss: 0.5126 | Train F1: 0.7832 | Val Loss: 0.4514 | Val F1: 0.8138 | Val AUC: 0.9307
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [04/15] | Train Loss: 0.4722 | Train F1: 0.8035 | Val Loss: 0.4317 | Val F1: 0.8177 | Val AUC: 0.9327
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [05/15] | Train Loss: 0.4356 | Train F1: 0.8172 | Val Loss: 0.4167 | Val F1: 0.8294 | Val AUC: 0.9345
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [06/15] | Train Loss: 0.4203 | Train F1: 0.8185 | Val Loss: 0.4150 | Val F1: 0.8282 | Val AUC: 0.9357
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [07/15] | Train Loss: 0.4046 | Train F1: 0.8232 | Val Loss: 0.4352 | Val F1: 0.8146 | Val AUC: 0.9351
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [08/15] | Train Loss: 0.3845 | Train F1: 0.8340 | Val Loss: 0.4143 | Val F1: 0.8306 | Val AUC: 0.9375
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [09/15] | Train Loss: 0.3664 | Train F1: 0.8446 | Val Loss: 0.3983 | Val F1: 0.8221 | Val AUC: 0.9382
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [10/15] | Train Loss: 0.3544 | Train F1: 0.8519 | Val Loss: 0.4107 | Val F1: 0.8167 | Val AUC: 0.9387
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [11/15] | Train Loss: 0.3418 | Train F1: 0.8579 | Val Loss: 0.4212 | Val F1: 0.8120 | Val AUC: 0.9359
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [12/15] | Train Loss: 0.3002 | Train F1: 0.8776 | Val Loss: 0.4334 | Val F1: 0.8127 | Val AUC: 0.9362
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [13/15] | Train Loss: 0.3032 | Train F1: 0.8764 | Val Loss: 0.4419 | Val F1: 0.8234 | Val AUC: 0.9375
+[INFO] Early stopping triggered at epoch 13
+
+[INFO] Loaded best model checkpoint from epoch 8 for final testing.
+
+--- Internal Test Results ---
+  accuracy: 0.8173
+  precision_macro: 0.7959
+  recall_macro: 0.7987
+  f1_macro: 0.7966
+  auc_macro: 0.9316
+  loss: 0.4236
+
+.15s/it]
+Eval Iter:  25%|##5       | 7/28 [00:16<00:30,  1.44s/it]
+Eval Iter:  32%|###2      | 9/28 [00:17<00:19,  1.05s/it]
+Eval Iter:  39%|###9      | 11/28 [00:18<00:12,  1.34it/s]
+Eval Iter:  46%|####6     | 13/28 [00:18<00:08,  1.77it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:18<00:05,  2.31it/s]
+Eval Iter:  61%|######    | 17/28 [00:19<00:03,  2.86it/s]
+Eval Iter:  68%|######7   | 19/28 [00:19<00:02,  3.48it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:19<00:01,  4.10it/s]
+Eval Iter:  82%|########2 | 23/28 [00:20<00:01,  4.65it/s]
+Eval Iter:  89%|########9 | 25/28 [00:20<00:00,  5.11it/s]
+Eval Iter:  93%|#########2| 26/28 [00:20<00:00,  5.33it/s]
+Eval Iter:  96%|#########6| 27/28 [00:25<00:01,  1.07s/it]
+Eval Iter: 100%|##########| 28/28 [00:27<00:00,  1.37s/it]
+                                                          
+
+Eval Iter:   0%|          | 0/28 [00:00<?, ?it/s]
+Eval Iter:   4%|3         | 1/28 [00:14<06:40, 14.84s/it]
+Eval Iter:  11%|#         | 3/28 [00:15<01:37,  3.91s/it]
+Eval Iter:  18%|#7        | 5/28 [00:15<00:48,  2.09s/it]
+Eval Iter:  25%|##5       | 7/28 [00:16<00:28,  1.37s/it]
+Eval Iter:  32%|###2      | 9/28 [00:17<00:18,  1.04it/s]
+Eval Iter:  39%|###9      | 11/28 [00:17<00:11,  1.47it/s]
+Eval Iter:  46%|####6     | 13/28 [00:17<00:07,  1.94it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:18<00:05,  2.43it/s]
+Eval Iter:  61%|######    | 17/28 [00:18<00:03,  3.08it/s]
+Eval Iter:  68%|######7   | 19/28 [00:18<00:02,  3.73it/s]
+Eval Iter:  71%|#######1  | 20/28 [00:18<00:01,  4.15it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:19<00:01,  3.89it/s]
+Eval Iter:  82%|########2 | 23/28 [00:19<00:01,  4.94it/s]
+Eval Iter:  86%|########5 | 24/28 [00:19<00:00,  5.50it/s]
+Eval Iter:  89%|########9 | 25/28 [00:19<00:00,  5.67it/s]
+Eval Iter:  93%|#########2| 26/28 [00:20<00:00,  2.31it/s]
+Eval Iter:  96%|#########6| 27/28 [00:23<00:01,  1.03s/it]
+Eval Iter: 100%|##########| 28/28 [00:24<00:00,  1.13s/it]
+                                                          
+
+
+============================================================
+[EXPERIMENT] backbone=resnet18, seed=7, dry_run=False
+============================================================
+[INFO] Training on device: cuda
+[INFO] Starting training for 15 epochs...
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [01/15] | Train Loss: 0.9056 | Train F1: 0.6220 | Val Loss: 0.6443 | Val F1: 0.7693 | Val AUC: 0.9101
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [02/15] | Train Loss: 0.5770 | Train F1: 0.7660 | Val Loss: 0.4875 | Val F1: 0.7981 | Val AUC: 0.9232
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [03/15] | Train Loss: 0.4826 | Train F1: 0.7954 | Val Loss: 0.4641 | Val F1: 0.8144 | Val AUC: 0.9284
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [04/15] | Train Loss: 0.4740 | Train F1: 0.7990 | Val Loss: 0.4262 | Val F1: 0.8208 | Val AUC: 0.9333
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [05/15] | Train Loss: 0.4439 | Train F1: 0.8076 | Val Loss: 0.4376 | Val F1: 0.8045 | Val AUC: 0.9315
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [06/15] | Train Loss: 0.4215 | Train F1: 0.8148 | Val Loss: 0.4126 | Val F1: 0.8180 | Val AUC: 0.9381
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [07/15] | Train Loss: 0.3884 | Train F1: 0.8323 | Val Loss: 0.4201 | Val F1: 0.8138 | Val AUC: 0.9359
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [08/15] | Train Loss: 0.3814 | Train F1: 0.8366 | Val Loss: 0.4127 | Val F1: 0.8269 | Val AUC: 0.9373
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [09/15] | Train Loss: 0.3666 | Train F1: 0.8482 | Val Loss: 0.4190 | Val F1: 0.8292 | Val AUC: 0.9393
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [10/15] | Train Loss: 0.3477 | Train F1: 0.8519 | Val Loss: 0.4183 | Val F1: 0.8263 | Val AUC: 0.9382
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [11/15] | Train Loss: 0.3422 | Train F1: 0.8565 | Val Loss: 0.4173 | Val F1: 0.8196 | Val AUC: 0.9380
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [12/15] | Train Loss: 0.3062 | Train F1: 0.8764 | Val Loss: 0.4002 | Val F1: 0.8298 | Val AUC: 0.9402
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [13/15] | Train Loss: 0.2720 | Train F1: 0.8957 | Val Loss: 0.4144 | Val F1: 0.8265 | Val AUC: 0.9388
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [14/15] | Train Loss: 0.2901 | Train F1: 0.8857 | Val Loss: 0.4078 | Val F1: 0.8287 | Val AUC: 0.9398
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [15/15] | Train Loss: 0.2717 | Train F1: 0.8889 | Val Loss: 0.4222 | Val F1: 0.8280 | Val AUC: 0.9366
+
+[INFO] Loaded best model checkpoint from epoch 12 for final testing.
+
+--- Internal Test Results ---
+  accuracy: 0.8330
+  precision_macro: 0.8091
+  recall_macro: 0.8061
+  f1_macro: 0.8073
+  auc_macro: 0.9328
+  loss: 0.4162
+
+8it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:22<00:06,  1.94it/s]
+Eval Iter:  61%|######    | 17/28 [00:23<00:04,  2.43it/s]
+Eval Iter:  68%|######7   | 19/28 [00:23<00:03,  2.94it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:23<00:02,  3.47it/s]
+Eval Iter:  82%|########2 | 23/28 [00:24<00:01,  3.88it/s]
+Eval Iter:  89%|########9 | 25/28 [00:24<00:00,  4.32it/s]
+Eval Iter:  93%|#########2| 26/28 [00:24<00:00,  4.75it/s]
+Eval Iter:  96%|#########6| 27/28 [00:29<00:01,  1.20s/it]
+Eval Iter: 100%|##########| 28/28 [00:32<00:00,  1.47s/it]
+                                                          
+
+Eval Iter:   0%|          | 0/28 [00:00<?, ?it/s]
+Eval Iter:   4%|3         | 1/28 [00:18<08:09, 18.12s/it]
+Eval Iter:  11%|#         | 3/28 [00:18<02:00,  4.80s/it]
+Eval Iter:  18%|#7        | 5/28 [00:19<01:00,  2.62s/it]
+Eval Iter:  25%|##5       | 7/28 [00:20<00:36,  1.74s/it]
+Eval Iter:  32%|###2      | 9/28 [00:21<00:24,  1.27s/it]
+Eval Iter:  39%|###9      | 11/28 [00:22<00:15,  1.11it/s]
+Eval Iter:  46%|####6     | 13/28 [00:22<00:10,  1.46it/s]
+Eval Iter:  50%|#####     | 14/28 [00:22<00:08,  1.73it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:23<00:06,  1.87it/s]
+Eval Iter:  57%|#####7    | 16/28 [00:23<00:05,  2.29it/s]
+Eval Iter:  61%|######    | 17/28 [00:23<00:04,  2.44it/s]
+Eval Iter:  64%|######4   | 18/28 [00:23<00:03,  2.99it/s]
+Eval Iter:  68%|######7   | 19/28 [00:23<00:02,  3.17it/s]
+Eval Iter:  71%|#######1  | 20/28 [00:24<00:02,  3.52it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:24<00:01,  3.68it/s]
+Eval Iter:  79%|#######8  | 22/28 [00:24<00:01,  3.80it/s]
+Eval Iter:  82%|########2 | 23/28 [00:24<00:01,  4.56it/s]
+Eval Iter:  86%|########5 | 24/28 [00:24<00:00,  4.21it/s]
+Eval Iter:  89%|########9 | 25/28 [00:25<00:00,  4.70it/s]
+Eval Iter:  93%|#########2| 26/28 [00:26<00:01,  1.49it/s]
+Eval Iter:  96%|#########6| 27/28 [00:30<00:01,  1.68s/it]
+Eval Iter: 100%|##########| 28/28 [00:33<00:00,  1.81s/it]
+                                                          
+
+
+============================================================
+[EXPERIMENT] backbone=resnet18, seed=123, dry_run=False
+============================================================
+[INFO] Training on device: cuda
+[INFO] Starting training for 15 epochs...
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [01/15] | Train Loss: 0.8841 | Train F1: 0.6279 | Val Loss: 0.6337 | Val F1: 0.7600 | Val AUC: 0.9106
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed123_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [02/15] | Train Loss: 0.5946 | Train F1: 0.7639 | Val Loss: 0.4896 | Val F1: 0.8019 | Val AUC: 0.9280
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed123_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [03/15] | Train Loss: 0.4658 | Train F1: 0.8049 | Val Loss: 0.4444 | Val F1: 0.8189 | Val AUC: 0.9317
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed123_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [04/15] | Train Loss: 0.4450 | Train F1: 0.8080 | Val Loss: 0.4307 | Val F1: 0.8173 | Val AUC: 0.9362
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [05/15] | Train Loss: 0.4410 | Train F1: 0.8139 | Val Loss: 0.4122 | Val F1: 0.8197 | Val AUC: 0.9375
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed123_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [06/15] | Train Loss: 0.4140 | Train F1: 0.8225 | Val Loss: 0.4067 | Val F1: 0.8295 | Val AUC: 0.9386
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed123_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [07/15] | Train Loss: 0.3682 | Train F1: 0.8440 | Val Loss: 0.4114 | Val F1: 0.8245 | Val AUC: 0.9370
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [08/15] | Train Loss: 0.3428 | Train F1: 0.8605 | Val Loss: 0.4217 | Val F1: 0.8121 | Val AUC: 0.9354
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [09/15] | Train Loss: 0.3413 | Train F1: 0.8590 | Val Loss: 0.4511 | Val F1: 0.8042 | Val AUC: 0.9375
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [10/15] | Train Loss: 0.3105 | Train F1: 0.8699 | Val Loss: 0.4303 | Val F1: 0.8245 | Val AUC: 0.9358
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [11/15] | Train Loss: 0.3259 | Train F1: 0.8662 | Val Loss: 0.3937 | Val F1: 0.8362 | Val AUC: 0.9394
+  --> Saved new best checkpoint to results\checkpoints\best_resnet18_seed123_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [12/15] | Train Loss: 0.2993 | Train F1: 0.8772 | Val Loss: 0.4043 | Val F1: 0.8140 | Val AUC: 0.9378
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [13/15] | Train Loss: 0.2764 | Train F1: 0.8953 | Val Loss: 0.4001 | Val F1: 0.8311 | Val AUC: 0.9397
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [14/15] | Train Loss: 0.2781 | Train F1: 0.8847 | Val Loss: 0.4522 | Val F1: 0.8041 | Val AUC: 0.9341
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [15/15] | Train Loss: 0.2436 | Train F1: 0.9034 | Val Loss: 0.4094 | Val F1: 0.8271 | Val AUC: 0.9405
+
+[INFO] Loaded best model checkpoint from epoch 11 for final testing.
+
+--- Internal Test Results ---
+  accuracy: 0.8240
+  precision_macro: 0.7989
+  recall_macro: 0.7997
+  f1_macro: 0.7993
+  auc_macro: 0.9306
+  loss: 0.4190
+
+3it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:22<00:06,  1.98it/s]
+Eval Iter:  61%|######    | 17/28 [00:22<00:04,  2.46it/s]
+Eval Iter:  68%|######7   | 19/28 [00:22<00:03,  2.98it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:23<00:01,  3.51it/s]
+Eval Iter:  82%|########2 | 23/28 [00:23<00:01,  3.94it/s]
+Eval Iter:  89%|########9 | 25/28 [00:23<00:00,  4.39it/s]
+Eval Iter:  93%|#########2| 26/28 [00:24<00:00,  4.72it/s]
+Eval Iter:  96%|#########6| 27/28 [00:29<00:01,  1.20s/it]
+Eval Iter: 100%|##########| 28/28 [00:31<00:00,  1.47s/it]
+                                                          
+
+Eval Iter:   0%|          | 0/28 [00:00<?, ?it/s]
+Eval Iter:   4%|3         | 1/28 [00:17<07:57, 17.70s/it]
+Eval Iter:  11%|#         | 3/28 [00:18<01:57,  4.72s/it]
+Eval Iter:  18%|#7        | 5/28 [00:19<00:58,  2.56s/it]
+Eval Iter:  25%|##5       | 7/28 [00:20<00:35,  1.71s/it]
+Eval Iter:  32%|###2      | 9/28 [00:21<00:23,  1.25s/it]
+Eval Iter:  39%|###9      | 11/28 [00:21<00:15,  1.12it/s]
+Eval Iter:  43%|####2     | 12/28 [00:21<00:11,  1.36it/s]
+Eval Iter:  46%|####6     | 13/28 [00:22<00:10,  1.50it/s]
+Eval Iter:  50%|#####     | 14/28 [00:22<00:07,  1.82it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:22<00:06,  1.97it/s]
+Eval Iter:  57%|#####7    | 16/28 [00:22<00:05,  2.39it/s]
+Eval Iter:  61%|######    | 17/28 [00:23<00:04,  2.45it/s]
+Eval Iter:  64%|######4   | 18/28 [00:23<00:03,  2.96it/s]
+Eval Iter:  68%|######7   | 19/28 [00:23<00:02,  3.05it/s]
+Eval Iter:  71%|#######1  | 20/28 [00:24<00:02,  3.25it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:24<00:02,  3.34it/s]
+Eval Iter:  79%|#######8  | 22/28 [00:24<00:01,  3.22it/s]
+Eval Iter:  86%|########5 | 24/28 [00:25<00:01,  3.65it/s]
+Eval Iter:  89%|########9 | 25/28 [00:25<00:00,  4.12it/s]
+Eval Iter:  93%|#########2| 26/28 [00:27<00:01,  1.44it/s]
+Eval Iter:  96%|#########6| 27/28 [00:31<00:01,  1.58s/it]
+Eval Iter: 100%|##########| 28/28 [00:33<00:00,  1.75s/it]
+                                                          
+
+[SUMMARY] resnet18: 3/3 seeds succeeded
+
+============================================================
+[EXPERIMENT] backbone=densenet121, seed=42, dry_run=False
+============================================================
+[INFO] Training on device: cuda
+[INFO] Starting training for 15 epochs...
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [01/15] | Train Loss: 0.6241 | Train F1: 0.7267 | Val Loss: 0.4358 | Val F1: 0.8089 | Val AUC: 0.9323
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [02/15] | Train Loss: 0.4316 | Train F1: 0.8173 | Val Loss: 0.4102 | Val F1: 0.8209 | Val AUC: 0.9352
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [03/15] | Train Loss: 0.3839 | Train F1: 0.8417 | Val Loss: 0.4404 | Val F1: 0.8214 | Val AUC: 0.9399
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [04/15] | Train Loss: 0.3146 | Train F1: 0.8780 | Val Loss: 0.4226 | Val F1: 0.8249 | Val AUC: 0.9400
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [05/15] | Train Loss: 0.2836 | Train F1: 0.8945 | Val Loss: 0.4469 | Val F1: 0.8241 | Val AUC: 0.9364
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [06/15] | Train Loss: 0.2401 | Train F1: 0.9087 | Val Loss: 0.4589 | Val F1: 0.8202 | Val AUC: 0.9402
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [07/15] | Train Loss: 0.2191 | Train F1: 0.9135 | Val Loss: 0.4580 | Val F1: 0.8282 | Val AUC: 0.9398
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [08/15] | Train Loss: 0.1734 | Train F1: 0.9345 | Val Loss: 0.4880 | Val F1: 0.8202 | Val AUC: 0.9400
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [09/15] | Train Loss: 0.1729 | Train F1: 0.9386 | Val Loss: 0.5295 | Val F1: 0.8117 | Val AUC: 0.9330
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [10/15] | Train Loss: 0.1446 | Train F1: 0.9465 | Val Loss: 0.4702 | Val F1: 0.8163 | Val AUC: 0.9397
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [11/15] | Train Loss: 0.1403 | Train F1: 0.9512 | Val Loss: 0.4969 | Val F1: 0.8353 | Val AUC: 0.9438
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed42_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [12/15] | Train Loss: 0.1151 | Train F1: 0.9600 | Val Loss: 0.5459 | Val F1: 0.8230 | Val AUC: 0.9413
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [13/15] | Train Loss: 0.1131 | Train F1: 0.9583 | Val Loss: 0.5290 | Val F1: 0.8121 | Val AUC: 0.9394
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [14/15] | Train Loss: 0.0910 | Train F1: 0.9685 | Val Loss: 0.5568 | Val F1: 0.8147 | Val AUC: 0.9328
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [15/15] | Train Loss: 0.0928 | Train F1: 0.9659 | Val Loss: 0.4982 | Val F1: 0.8309 | Val AUC: 0.9426
+
+[INFO] Loaded best model checkpoint from epoch 11 for final testing.
+
+--- Internal Test Results ---
+  accuracy: 0.8464
+  precision_macro: 0.8229
+  recall_macro: 0.8202
+  f1_macro: 0.8214
+  auc_macro: 0.9299
+  loss: 0.5624
+
+0it/s]
+Eval Iter:  46%|####6     | 13/28 [00:20<00:09,  1.58it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:21<00:06,  2.07it/s]
+Eval Iter:  61%|######    | 17/28 [00:21<00:04,  2.55it/s]
+Eval Iter:  68%|######7   | 19/28 [00:21<00:02,  3.07it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:22<00:01,  3.59it/s]
+Eval Iter:  82%|########2 | 23/28 [00:22<00:01,  3.96it/s]
+Eval Iter:  89%|########9 | 25/28 [00:22<00:00,  4.40it/s]
+Eval Iter:  93%|#########2| 26/28 [00:23<00:00,  4.53it/s]
+Eval Iter:  96%|#########6| 27/28 [00:28<00:01,  1.18s/it]
+Eval Iter: 100%|##########| 28/28 [00:30<00:00,  1.46s/it]
+                                                          
+
+Eval Iter:   0%|          | 0/28 [00:00<?, ?it/s]
+Eval Iter:   4%|3         | 1/28 [00:16<07:32, 16.75s/it]
+Eval Iter:  11%|#         | 3/28 [00:17<01:52,  4.49s/it]
+Eval Iter:  18%|#7        | 5/28 [00:18<00:56,  2.46s/it]
+Eval Iter:  25%|##5       | 7/28 [00:19<00:35,  1.67s/it]
+Eval Iter:  32%|###2      | 9/28 [00:20<00:23,  1.25s/it]
+Eval Iter:  39%|###9      | 11/28 [00:21<00:15,  1.10it/s]
+Eval Iter:  46%|####6     | 13/28 [00:21<00:10,  1.43it/s]
+Eval Iter:  50%|#####     | 14/28 [00:21<00:08,  1.69it/s]
+Eval Iter:  54%|#####3    | 15/28 [00:22<00:07,  1.75it/s]
+Eval Iter:  57%|#####7    | 16/28 [00:22<00:05,  2.17it/s]
+Eval Iter:  61%|######    | 17/28 [00:22<00:04,  2.22it/s]
+Eval Iter:  68%|######7   | 19/28 [00:23<00:03,  2.79it/s]
+Eval Iter:  71%|#######1  | 20/28 [00:23<00:02,  3.10it/s]
+Eval Iter:  75%|#######5  | 21/28 [00:23<00:02,  3.10it/s]
+Eval Iter:  79%|#######8  | 22/28 [00:24<00:01,  3.25it/s]
+Eval Iter:  82%|########2 | 23/28 [00:24<00:01,  3.77it/s]
+Eval Iter:  86%|########5 | 24/28 [00:24<00:01,  3.70it/s]
+Eval Iter:  89%|########9 | 25/28 [00:24<00:00,  3.90it/s]
+Eval Iter:  93%|#########2| 26/28 [00:26<00:01,  1.38it/s]
+Eval Iter:  96%|#########6| 27/28 [00:30<00:01,  1.66s/it]
+Eval Iter: 100%|##########| 28/28 [00:32<00:00,  1.82s/it]
+                                                          
+
+
+============================================================
+[EXPERIMENT] backbone=densenet121, seed=7, dry_run=False
+============================================================
+[INFO] Training on device: cuda
+[INFO] Starting training for 15 epochs...
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [01/15] | Train Loss: 0.6375 | Train F1: 0.7241 | Val Loss: 0.4449 | Val F1: 0.8077 | Val AUC: 0.9301
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [02/15] | Train Loss: 0.4378 | Train F1: 0.8120 | Val Loss: 0.4239 | Val F1: 0.8256 | Val AUC: 0.9318
+  --> Saved new best checkpoint to results\checkpoints\best_densenet121_seed7_cls3.pt
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [03/15] | Train Loss: 0.3612 | Train F1: 0.8523 | Val Loss: 0.4324 | Val F1: 0.8195 | Val AUC: 0.9324
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [04/15] | Train Loss: 0.3191 | Train F1: 0.8705 | Val Loss: 0.4413 | Val F1: 0.8148 | Val AUC: 0.9336
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [05/15] | Train Loss: 0.3007 | Train F1: 0.8786 | Val Loss: 0.4300 | Val F1: 0.8171 | Val AUC: 0.9317
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [06/15] | Train Loss: 0.2495 | Train F1: 0.9037 | Val Loss: 0.4593 | Val F1: 0.8220 | Val AUC: 0.9299
+[WARN] AUC computation failed: Target scores need to be probabilities for multiclass roc_auc, i.e. they should sum up to 1.0 over classes
+Epoch [07/15] | Train Loss: 0.2300 | Train F1: 0.9107 | Val Loss: 0.4854 | Val F1: 0.8189 | Val AUC: 0.9259
+[INFO] Early stopping triggered at epoch 7
+
+[INFO] Loaded best model checkpoint from epoch 2 for final testing.
+
+--- Internal Test Results ---
+  accuracy: 0.8161
+  precision_macro: 0.7921
+  recall_macro: 0.7945
+  f1_macro: 0.7931
+  auc_macro: 0.9242
+  loss: 0.4400

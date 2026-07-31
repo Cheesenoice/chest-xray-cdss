@@ -27,7 +27,7 @@ def run_experiment(config_path, backbone, seed, dry_run=False):
 
 
 def run_all(config_path="configs/default.yaml", dry_run=False):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     backbones = cfg.get("backbones", ["resnet18", "densenet121", "efficientnet_b0"])
