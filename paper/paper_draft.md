@@ -71,8 +71,10 @@ Models were trained using AdamW ($\eta = 10^{-4}$, weight decay $0.01$), cosine 
 
 *[Metrics table populated after multi-seed run completion]*
 
-### 3.2 Classical Baseline vs. Deep Learning
-*[Comparison text populated after classical script output]*
+### 3.2 Classical Baseline vs. Deep Learning Benchmark
+The classical machine learning pipeline combining HOG feature extraction and an RBF-kernel Support Vector Machine (SVM) achieved an internal test **Accuracy of 83.51%**, **Macro F1 of 79.40%**, and **Macro AUC of 0.9470** on the internal test set (934 images).
+
+However, on the completely held-out external test set (Montgomery County, 414 images), the classical baseline performance dropped significantly to **10.87% Accuracy** and **9.17% Macro F1** (AUC 0.6052). This steep degradation highlights the inability of handcrafted HOG descriptors to adjust to cross-institutional scanner variations, patient positioning, and domain shifts between adult and pediatric cohorts, establishing a clear motivation for deep transfer learning models.
 
 ### 3.3 External Validation Generalization Gap
 *[Analysis of performance drop on Montgomery external test set]*
