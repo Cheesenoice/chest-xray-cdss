@@ -1,138 +1,144 @@
 import os
-import yaml
+import cv2
 import torch
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
+import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from PIL import Image
-import cv2
+import yaml
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 
 from src.models import build_model
-from src.datasets import LABEL_MAP_4CLASS, LABEL_MAP_3CLASS
+from src.datasets import LABEL_MAP_4CLASS, LABEL_MAP_3CLASS, get_transforms
 
+INV_LABEL_MAP_4CLASS = {v: k for k, v in LABEL_MAP_4CLASS.items()}
+INV_LABEL_MAP_3CLASS = {v: k for k, v in LABEL_MAP_3CLASS.items()}
 
-def generate_gradcam(model, input_tensor, target_layer, target_class=None):
-    from pytorch_grad_cam import GradCAM
-    from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-
-    cam = GradCAM(model=model, target_layers=[target_layer])
-    if target_class is not None:
-        targets = [ClassifierOutputTarget(target_class)]
+def get_target_layer(model, backbone_name):
+    """Retrieve the target convolutional layer for Grad-CAM visualization."""
+    if "densenet" in backbone_name:
+        return [model.model.features.denseblock4]
+    elif "resnet" in backbone_name:
+        return [model.model.layer4[-1]]
+    elif "efficientnet" in backbone_name:
+        return [model.model.conv_head]
     else:
-        targets = None
-    grayscale_cam = cam(input_tensor=input_tensor, targets=targets)
-    return grayscale_cam[0, :]
+        # Fallback to last conv module
+        conv_layers = [module for module in model.modules() if isinstance(module, torch.nn.Conv2d)]
+        return [conv_layers[-1]]
 
+def generate_gradcam_overlay(model, image_path, target_layer, label_map, device, image_size=224):
+    """Generate Grad-CAM heatmap overlay for a single image."""
+    model.eval()
+    
+    # Read original image
+    orig_img = cv2.imread(image_path)
+    if orig_img is None:
+        orig_img = np.array(Image.open(image_path).convert("RGB"))
+    else:
+        orig_img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2RGB)
+    
+    orig_resized = cv2.resize(orig_img, (image_size, image_size))
+    rgb_float = orig_resized.astype(np.float32) / 255.0
 
-def overlay_heatmap(img_bgr, heatmap, alpha=0.4):
-    heatmap = np.uint8(255 * heatmap)
-    heatmap_colored = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    overlay = cv2.addWeighted(img_bgr, 1 - alpha, heatmap_colored, alpha, 0)
-    return overlay
+    # Transform for model inference
+    transform = get_transforms(image_size=image_size, is_train=False)
+    input_tensor = transform(image=orig_img)["image"].unsqueeze(0).to(device)
 
+    # Model inference
+    with torch.no_grad():
+        logits = model(input_tensor)
+        probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
+        pred_idx = int(np.argmax(probs))
+        confidence = probs[pred_idx]
 
-def run_explain(config_path="configs/default.yaml", checkpoint_path=None,
-                sample_dir=None, output_dir="results/gradcam_samples"):
-    with open(config_path, "r", encoding="utf-8") as f:
+    inv_map = {v: k for k, v in label_map.items()}
+    pred_label = inv_map.get(pred_idx, "Unknown")
+
+    # Grad-CAM extraction
+    cam = GradCAM(model=model, target_layers=target_layer)
+    targets = [ClassifierOutputTarget(pred_idx)]
+    grayscale_cam = cam(input_tensor=input_tensor, targets=targets)[0, :]
+
+    # Visual overlay
+    visualization = show_cam_on_image(rgb_float, grayscale_cam, use_rgb=True)
+
+    return orig_resized, visualization, pred_label, confidence, probs
+
+def generate_gradcam_gallery(config_path="configs/default.yaml", checkpoint_path=None, num_samples_per_class=2):
+    with open(config_path, "r") as f:
         cfg = yaml.safe_load(f)
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_classes = cfg["data"].get("num_classes", 4)
     backbone = cfg["model"]["backbone"]
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    seed = cfg.get("seed", 42)
     label_map = LABEL_MAP_4CLASS if num_classes == 4 else LABEL_MAP_3CLASS
-    class_names = [k for k, v in sorted(label_map.items(), key=lambda x: x[1])]
+    inv_label_map = {v: k for k, v in label_map.items()}
 
-    model = build_model(backbone_name=backbone, num_classes=num_classes,
-                        pretrained=False, drop_rate=0).to(device)
-    model.eval()
-
+    # Checkpoint path
     if checkpoint_path is None:
-        checkpoint_path = Path("results/checkpoints") / f"best_{backbone}_seed{cfg.get('seed', 42)}_cls{num_classes}.pt"
+        checkpoint_path = f"results/checkpoints/best_{backbone}_seed{seed}.pt"
 
-    if not Path(checkpoint_path).exists():
-        print(f"[ERROR] Checkpoint not found at {checkpoint_path}")
+    print(f"[INFO] Building model {backbone}...")
+    model = build_model(backbone_name=backbone, num_classes=num_classes, pretrained=False).to(device)
+
+    if os.path.exists(checkpoint_path):
+        print(f"[INFO] Loading checkpoint from {checkpoint_path}...")
+        ckpt = torch.load(checkpoint_path, map_location=device)
+        model.load_state_dict(ckpt["model_state_dict"])
+    else:
+        print(f"[WARN] Checkpoint {checkpoint_path} not found. Running with initial weights for dry-run testing.")
+
+    target_layer = get_target_layer(model, backbone)
+
+    # Load test split
+    splits_dir = Path(cfg["data"]["splits_dir"])
+    test_df = pd.read_csv(splits_dir / "test.csv")
+
+    output_dir = Path("results/figures/gradcam_samples")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    sampled_records = []
+    for lbl_name in label_map.keys():
+        sub_df = test_df[test_df["label"] == lbl_name]
+        if len(sub_df) > 0:
+            samples = sub_df.sample(min(num_samples_per_class, len(sub_df)), random_state=seed)
+            sampled_records.append(samples)
+
+    if not sampled_records:
+        print("[ERROR] No samples found in test set.")
         return
 
-    ckpt = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(ckpt["model_state_dict"])
-    print(f"[INFO] Loaded checkpoint from {checkpoint_path}")
+    sample_df = pd.concat(sampled_records, ignore_index=True)
 
-    # Determine target layer for Grad-CAM
-    if "densenet" in backbone:
-        target_layer = model.model.features.denseblock4
-    elif "resnet" in backbone:
-        target_layer = model.model.layer4
-    elif "efficientnet" in backbone:
-        target_layer = model.model.blocks[-1]
-    elif "vit" in backbone or "swin" in backbone:
-        target_layer = model.model.blocks[-1]
-    else:
-        target_layer = model.model.layer4
-        print(f"[WARN] Unknown backbone {backbone}, using last conv layer heuristic")
+    fig, axes = plt.subplots(len(sample_df), 2, figsize=(10, 4 * len(sample_df)))
+    if len(sample_df) == 1:
+        axes = np.expand_dims(axes, 0)
 
-    out_dir = Path(output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[INFO] Generating Grad-CAM heatmaps for {len(sample_df)} test samples...")
+    for idx, (_, row) in enumerate(sample_df.iterrows()):
+        orig_img, cam_overlay, pred_label, conf, _ = generate_gradcam_overlay(
+            model, row["filepath"], target_layer, label_map, device, image_size=cfg["data"].get("image_size", 224)
+        )
 
-    from torchvision import transforms as T
-    normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        axes[idx, 0].imshow(orig_img)
+        axes[idx, 0].set_title(f"Original X-Ray\nTrue Label: {row['label']}", fontsize=11, fontweight="bold")
+        axes[idx, 0].axis("off")
 
-    # Use sample images from test set if no directory specified
-    if sample_dir is None:
-        splits_dir = Path(cfg["data"]["splits_dir"])
-        test_csv = splits_dir / "test.csv"
-        if not test_csv.exists():
-            print("[ERROR] No sample_dir and no test.csv found")
-            return
-        import pandas as pd
-        df = pd.read_csv(test_csv)
-        # Pick a few examples per class
-        sample_paths = df.groupby("label").apply(lambda x: x.sample(min(3, len(x)), random_state=42))
-        sample_paths = sample_paths["filepath"].tolist()
-    else:
-        sample_paths = list(Path(sample_dir).rglob("*.png")) + list(Path(sample_dir).rglob("*.jpg")) + list(Path(sample_dir).rglob("*.jpeg"))
+        axes[idx, 1].imshow(cam_overlay)
+        axes[idx, 1].set_title(f"Grad-CAM Heatmap\nPred: {pred_label} ({conf*100:.1f}%)", fontsize=11, fontweight="bold", color="darkred")
+        axes[idx, 1].axis("off")
 
-    for img_path in sample_paths:
-        if not os.path.exists(img_path):
-            continue
-        img_bgr = cv2.imread(img_path)
-        if img_bgr is None:
-            continue
-        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-        img_resized = cv2.resize(img_rgb, (224, 224))
-        img_tensor = torch.tensor(img_resized).permute(2, 0, 1).float() / 255.0
-        img_tensor = normalize(img_tensor).unsqueeze(0).to(device)
+    plt.tight_layout()
+    gallery_path = output_dir / f"gradcam_gallery_{backbone}.png"
+    plt.savefig(gallery_path, dpi=300, bbox_inches="tight")
+    plt.close()
 
-        # Predict
-        with torch.no_grad():
-            output = model(img_tensor)
-            probs = torch.softmax(output, dim=1)
-            pred_class = torch.argmax(probs, dim=1).item()
-            confidence = probs[0, pred_class].item()
-
-        # Generate Grad-CAM for predicted class
-        heatmap = generate_gradcam(model, img_tensor, target_layer, target_class=pred_class)
-        overlay = overlay_heatmap(img_bgr, heatmap)
-
-        # Save overlay
-        stem = Path(img_path).stem
-        overlay_path = out_dir / f"{stem}_gradcam.png"
-        cv2.imwrite(str(overlay_path), overlay)
-
-        pred_label = class_names[pred_class] if pred_class < len(class_names) else str(pred_class)
-        print(f"  {stem}: predicted={pred_label} ({confidence:.3f}) -> {overlay_path.name}")
-
-    print(f"[SUCCESS] Grad-CAM overlays saved to {out_dir}/")
-
+    print(f"[SUCCESS] Exported Grad-CAM visualization gallery to {gallery_path}")
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="configs/default.yaml")
-    parser.add_argument("--checkpoint", default=None)
-    parser.add_argument("--sample-dir", default=None)
-    parser.add_argument("--output-dir", default="results/gradcam_samples")
-    args = parser.parse_args()
-    run_explain(args.config, args.checkpoint, args.sample_dir, args.output_dir)
+    generate_gradcam_gallery()
