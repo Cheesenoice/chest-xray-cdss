@@ -29,13 +29,13 @@ model:
 
 train:
   batch_size: 32
-  num_workers: 2
+  num_workers: 0
   epochs: 15
   lr: 0.0001
   weight_decay: 0.01
   scheduler: "cosine" # cosine | plateau | none
   early_stopping_patience: 5
-  use_amp: true
+  use_amp: false
 
 explainability:
   gradcam_target_layer: "features.denseblock4"

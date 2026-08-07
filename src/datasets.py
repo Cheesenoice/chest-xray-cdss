@@ -104,10 +104,10 @@ def build_dataloaders(csv_dir, image_size=224, batch_size=32, num_workers=2, num
         sampler=sampler,
         shuffle=(sampler is None),
         num_workers=num_workers,
-        pin_memory=True
+        pin_memory=False
     )
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
-    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
-    ext_loader = DataLoader(ext_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True) if ext_ds is not None else None
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=False)
+    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=False)
+    ext_loader = DataLoader(ext_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=False) if ext_ds is not None else None
 
     return train_loader, val_loader, test_loader, ext_loader, label_map
