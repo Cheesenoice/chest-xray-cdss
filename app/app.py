@@ -16,7 +16,10 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from src.models import build_model
 from src.explain import get_target_layer
 from src.datasets import LABEL_MAP_4CLASS, LABEL_MAP_3CLASS, get_transforms
-from app.report import generate_pdf_report
+try:
+    from app.report import generate_pdf_report
+except ModuleNotFoundError:
+    from report import generate_pdf_report
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
