@@ -1,0 +1,1034 @@
+# CXR-COPILOT — MASTER PROJECT PLAN
+
+## 1. Chốt phạm vi dự án
+
+### Tên sản phẩm
+
+**CXR-Copilot: Explainable Chest X-ray Screening and Similar-Case Retrieval Platform**
+
+### Tên đề tài tiếng Việt
+
+**Hệ thống hỗ trợ sàng lọc X-quang ngực có giải thích và truy hồi ca bệnh tương tự sử dụng mô hình nền tảng chuyên X-quang.**
+
+### Tên paper dự kiến
+
+**Evaluating Radiology-Specific Foundation Representations for Explainable Chest X-ray Classification and Similar-Case Retrieval under Dataset Shift**
+
+### Sản phẩm không phải là
+
+```text
+Upload ảnh
+└── AI dự đoán bệnh
+```
+
+### Sản phẩm hoàn chỉnh là
+
+```text
+CXR-Copilot
+├── Quản lý danh sách ca khám
+├── Tiếp nhận ảnh X-quang
+├── Chọn tác vụ sàng lọc phù hợp
+├── AI phân tích ảnh
+├── Hiển thị xác suất và mức độ tin cậy
+├── Giải thích vùng ảnh ảnh hưởng đến quyết định
+├── Truy hồi các ca X-quang tương tự
+├── Cho phép bác sĩ ghi chú và xác nhận
+├── Lưu lịch sử ca khám
+└── Xuất báo cáo PDF
+```
+
+Hệ thống chỉ phục vụ nghiên cứu và hỗ trợ quyết định, không được trình bày như một công cụ chẩn đoán thay thế bác sĩ. Model card chính thức của RAD-DINO cũng xác định model được chia sẻ cho nghiên cứu, không dành cho sử dụng lâm sàng trực tiếp.
+
+---
+
+# 2. Chốt AI Core
+
+## 2.1. Model chính của sản phẩm
+
+```text
+AI Core
+└── RAD-DINO
+    ├── Loại: Vision Transformer
+    ├── Phương pháp pretraining: DINOv2 self-supervised
+    ├── Chuyên biệt: Chest X-ray
+    ├── Kích thước: khoảng 86,6 triệu tham số
+    ├── Đầu ra CLS embedding: 768 chiều
+    └── Đầu ra patch embedding: lưới đặc trưng không gian
+```
+
+RAD-DINO được công bố dạng preprint năm 2024 và xuất bản trên *Nature Machine Intelligence* năm 2025. Checkpoint công khai được huấn luyện trên 882.775 ảnh X-quang ngực từ năm nguồn dữ liệu công khai. Model card chính thức cũng liệt kê classification, clustering và nearest-neighbor image retrieval là các downstream use case phù hợp.
+
+## 2.2. Tại sao chọn RAD-DINO làm product model?
+
+```text
+Một ảnh X-quang
+└── RAD-DINO Encoder
+    ├── CLS embedding
+    │   ├── Classification head
+    │   └── Similar-case retrieval
+    │
+    └── Patch embeddings
+        ├── Heatmap giải thích
+        └── Phân tích vùng ảnh
+```
+
+Như vậy, một encoder có thể phục vụ cả:
+
+* Phân loại bệnh.
+* Trích xuất embedding.
+* Tìm ca tương tự.
+* Clustering.
+* Giải thích không gian.
+* Mở rộng sang report generation trong tương lai.
+
+Không chọn model chỉ vì nó mới nhất. Các đánh giá gần đây cho thấy foundation model không có model nào tốt nhất trên mọi tác vụ; hiệu quả phụ thuộc vào classification, segmentation, retrieval và cách pretraining. Vì vậy, RAD-DINO vẫn phải được so sánh thực nghiệm với CNN chuẩn.
+
+---
+
+# 3. Chốt bài toán sản phẩm
+
+Không huấn luyện một classifier duy nhất gồm:
+
+```text
+Normal
+Bacterial pneumonia
+Viral pneumonia
+Tuberculosis
+```
+
+Lý do là pneumonia Kermany chủ yếu là ảnh trẻ em, còn Shenzhen/Montgomery TB là ảnh người lớn. Model có thể học tuổi, cấu trúc cơ thể, thiết bị hoặc nguồn ảnh thay vì học bệnh.
+
+Thay vào đó:
+
+```text
+RAD-DINO Shared Encoder
+├── Head A — Pediatric Pneumonia Screening
+│   ├── Normal
+│   ├── Bacterial pneumonia
+│   └── Viral pneumonia
+│
+└── Head B — Adult Tuberculosis Screening
+    ├── Non-TB
+    └── TB
+```
+
+## Giao diện sử dụng
+
+Khi tạo ca mới, người dùng chọn:
+
+```text
+Screening module
+├── Pediatric Pneumonia
+└── Adult Tuberculosis
+```
+
+Ở phiên bản đồ án, không để AI tự động chọn module dựa trên hình dáng hoặc tuổi vì điều đó có thể làm tăng domain confounding.
+
+---
+
+# 4. Chốt câu hỏi nghiên cứu của paper
+
+## Main Research Question
+
+> **Does radiology-specific self-supervised pretraining provide more accurate, generalizable and reusable representations than conventional ImageNet-pretrained models for chest X-ray classification and similar-case retrieval?**
+
+Dịch:
+
+> Mô hình được tiền huấn luyện tự giám sát chuyên biệt cho X-quang có tạo ra biểu diễn chính xác, tổng quát và tái sử dụng tốt hơn các mô hình pretrained trên ImageNet trong phân loại X-quang và truy hồi ca tương tự hay không?
+
+## Các research question cụ thể
+
+### RQ1 — Classification
+
+> RAD-DINO có đạt macro-F1 và AUROC tốt hơn các CNN pretrained bằng ImageNet trên cùng dữ liệu và protocol huấn luyện hay không?
+
+### RQ2 — External generalization
+
+> RAD-DINO có giảm mức suy giảm hiệu năng khi chuyển sang một nguồn dữ liệu hoàn toàn mới hay không?
+
+### RQ3 — Similar-case retrieval
+
+> Embedding của RAD-DINO có truy hồi được các ca bệnh cùng chẩn đoán tốt hơn embedding của DenseNet121 và ConvNeXt V2 hay không?
+
+### RQ4 — Adaptation strategy
+
+> Linear probing, partial fine-tuning hay full fine-tuning phù hợp nhất với dữ liệu nhỏ và tài nguyên tính toán giới hạn?
+
+## Giả thuyết
+
+```text
+H1
+└── RAD-DINO đạt macro-F1 và AUROC cao hơn baseline CNN.
+
+H2
+└── RAD-DINO có generalization gap nhỏ hơn trên external dataset.
+
+H3
+└── RAD-DINO đạt Precision@K và mAP@K cao hơn trong similar-case retrieval.
+
+H4
+└── Partial fine-tuning tạo cân bằng tốt nhất giữa hiệu năng,
+    chi phí huấn luyện và nguy cơ overfitting.
+```
+
+## Đóng góp dự kiến của paper
+
+```text
+Paper Contributions
+├── Benchmark reproducible giữa model cổ điển và foundation model
+├── So sánh trên cùng split, seed và evaluation protocol
+├── External validation theo nguồn dữ liệu
+├── Đánh giá cả classification và image retrieval
+├── Phân tích calibration và uncertainty
+├── Explainability cho CNN và Vision Transformer
+└── Demo doctor-in-the-loop có thể chạy được
+```
+
+Paper không tuyên bố:
+
+* Sáng tạo kiến trúc neural network mới.
+* Đạt chẩn đoán ngang bác sĩ.
+* Được xác nhận lâm sàng.
+* Có thể triển khai trực tiếp tại bệnh viện.
+* Các ca tương tự làm tăng chất lượng quyết định của bác sĩ, trừ khi có nghiên cứu người dùng thật.
+
+---
+
+# 5. Chốt các model thí nghiệm
+
+```text
+Experiment Models
+├── M0 — HOG + SVM
+│   └── Classical machine-learning baseline
+│
+├── M1 — ResNet-18
+│   └── Lightweight CNN baseline
+│
+├── M2 — DenseNet-121
+│   └── Established deep CNN baseline
+│
+├── M3 — ConvNeXt V2-Tiny
+│   └── Modern convolutional model
+│
+└── M4 — RAD-DINO
+    ├── Frozen encoder + linear probe
+    └── Partial fine-tuning
+```
+
+ResNet được công bố tại CVPR 2016, DenseNet tại CVPR 2017, ConvNeXt V2 tại CVPR 2023 và RAD-DINO có preprint năm 2024, xuất bản journal năm 2025.
+
+## Không đưa vào thí nghiệm chính
+
+```text
+Excluded from Core Experiments
+├── EfficientNet-B0
+│   └── Trùng vai trò modern CNN với ConvNeXt V2
+│
+├── Swin-Tiny
+│   └── RAD-DINO đã đại diện cho Vision Transformer
+│
+├── ViT-Small
+│   └── Không tạo thêm một research comparison cần thiết
+│
+├── BiomedCLIP
+│   └── Không chuyên riêng Chest X-ray và tăng độ phức tạp prompt/text
+│
+├── MAIRA-2
+│   └── Quá lớn và report generation không phải contribution chính
+│
+└── Model 2026 chưa ổn định
+    └── Không thêm chỉ để sản phẩm mang nhãn “mới nhất”
+```
+
+BiomedCLIP vẫn là một model quan trọng, được pretrained trên 15 triệu cặp image–text biomedical, nhưng nó không cần thiết cho câu hỏi chính của dự án này.
+
+---
+
+# 6. Chốt mô hình được triển khai trong product
+
+## Mặc định
+
+```text
+Production candidate
+└── RAD-DINO
+    ├── Official preprocessing
+    ├── 518 × 518 input
+    ├── Partial fine-tuning
+    ├── Task-specific classification head
+    └── FAISS index từ CLS embeddings
+```
+
+RAD-DINO chính thức sử dụng preprocessing với cạnh ngắn được resize về 518; processor công khai thực hiện resize, crop và normalization tương ứng.
+
+## Deployment gate
+
+RAD-DINO được dùng trong demo trừ khi xảy ra một trong các trường hợp sau:
+
+```text
+RAD-DINO replacement gate
+├── External macro-F1 thấp hơn model tốt nhất trên 2 điểm phần trăm
+├── Recall của một lớp quan trọng thấp nghiêm trọng
+├── Calibration không sửa được bằng temperature scaling
+└── Inference không ổn định trên môi trường triển khai
+```
+
+Khi đó product sẽ:
+
+```text
+Classification
+└── Dùng ConvNeXt V2 hoặc DenseNet121 tốt nhất
+
+Retrieval
+└── Vẫn dùng RAD-DINO embedding
+```
+
+Như vậy product không bị khóa cứng vào một classifier yếu, nhưng RAD-DINO vẫn là representation engine chính.
+
+---
+
+# 7. Chốt dữ liệu
+
+```text
+Datasets
+├── Task A — Pediatric Pneumonia
+│   └── Kermany Chest X-ray
+│       ├── Normal
+│       ├── Bacterial pneumonia
+│       └── Viral pneumonia
+│
+└── Task B — Adult TB
+    ├── Shenzhen
+    │   └── Training + internal validation
+    │
+    └── Montgomery
+        └── External test only
+```
+
+## Quy tắc khoa học
+
+```text
+Data Rules
+├── Không dùng external test để chọn model
+├── Không chỉnh threshold trên external test
+├── Xóa duplicate trước khi split
+├── Dùng perceptual hash để phát hiện near-duplicate
+├── Không cho cùng ảnh vào nhiều split
+├── Lưu manifest cho mọi ảnh
+├── Lưu nguồn dataset và checksum
+└── Báo cáo rõ khi không có patient ID
+```
+
+Với Kermany, nếu không xác định được patient ID đáng tin cậy, paper phải ghi rõ rằng patient-level leakage không thể được loại trừ hoàn toàn. Không được viết rằng đã patient-level split nếu dữ liệu không hỗ trợ điều đó.
+
+---
+
+# 8. Chốt protocol huấn luyện
+
+```text
+Training Protocol
+├── Seeds
+│   ├── 42
+│   ├── 7
+│   └── 123
+│
+├── Internal split
+│   ├── Train: 70%
+│   ├── Validation: 15%
+│   └── Test: 15%
+│
+├── Optimizer
+│   └── AdamW
+│
+├── Loss
+│   ├── Baseline: weighted cross-entropy
+│   └── Ablation: focal loss trên model tốt nhất
+│
+├── Scheduler
+│   └── Cosine annealing
+│
+├── Model selection
+│   └── Validation macro-F1
+│
+├── Early stopping
+│   └── Patience 5 epochs
+│
+├── Precision
+│   └── Mixed precision AMP
+│
+└── Logging
+    ├── Learning rate
+    ├── Train loss
+    ├── Validation loss
+    ├── Macro-F1
+    ├── AUROC
+    ├── Epoch time
+    └── GPU memory
+```
+
+## Benchmark công bằng
+
+```text
+Phase A — Standardized benchmark
+├── Input: 224 × 224
+├── Cùng split
+├── Cùng augmentations
+├── Cùng seeds
+├── Cùng epoch budget
+└── So sánh tất cả model
+
+Phase B — Product optimization
+└── RAD-DINO
+    ├── Official 518 × 518 processor
+    ├── Frozen linear probe
+    ├── Unfreeze last 2 transformer blocks
+    └── Chọn configuration tốt nhất bằng validation
+```
+
+Nghiên cứu năm 2026 cảnh báo rằng global frozen embeddings có thể làm mất tín hiệu tổn thương nhỏ, trong khi patch-local features vẫn giữ được tín hiệu. Do đó project phải lưu cả CLS và patch embeddings, đồng thời không mặc định rằng frozen CLS luôn đủ tốt.
+
+---
+
+# 9. Chốt metrics
+
+## Classification metrics
+
+```text
+Classification Evaluation
+├── Primary metric
+│   └── Macro-F1
+│
+├── Secondary metrics
+│   ├── AUROC macro one-vs-rest
+│   ├── Balanced accuracy
+│   ├── Accuracy
+│   ├── Precision per class
+│   ├── Recall per class
+│   ├── F1 per class
+│   └── Confusion matrix
+│
+├── Reliability
+│   ├── Expected Calibration Error
+│   ├── Brier score
+│   └── Reliability diagram
+│
+└── Statistics
+    ├── Mean ± standard deviation qua 3 seeds
+    └── Bootstrap 95% confidence interval
+```
+
+## External validation
+
+```text
+Generalization Evaluation
+├── Internal macro-F1
+├── External macro-F1
+├── Internal AUROC
+├── External AUROC
+└── Generalization gap
+    └── Internal metric − External metric
+```
+
+## Similar-case retrieval
+
+```text
+Retrieval Evaluation
+├── Query
+│   └── Test image
+│
+├── Reference index
+│   └── Training/reference images only
+│
+├── Similarity
+│   └── Cosine similarity
+│
+└── Metrics
+    ├── Precision@1
+    ├── Precision@5
+    ├── Recall@10
+    ├── mAP@10
+    └── Same-label retrieval rate
+```
+
+## Product metrics
+
+```text
+System Evaluation
+├── Model loading time
+├── Median inference latency
+├── p95 inference latency
+├── Retrieval latency
+├── Peak VRAM
+├── Model size
+└── PDF report generation time
+```
+
+---
+
+# 10. Chốt luồng hoạt động của sản phẩm
+
+```text
+CXR-Copilot Application
+│
+├── 01. Dashboard
+│   ├── Tổng số ca
+│   ├── Ca chờ duyệt
+│   ├── Ca confidence thấp
+│   ├── Ca pneumonia
+│   └── Ca TB
+│
+├── 02. Create New Case
+│   ├── Tạo mã ca ẩn danh
+│   ├── Nhập tuổi
+│   ├── Nhập giới tính nếu cần
+│   ├── Chọn screening module
+│   └── Upload X-ray
+│
+├── 03. Image Validation
+│   ├── Kiểm tra định dạng
+│   ├── Kiểm tra kích thước
+│   ├── Kiểm tra ảnh có đọc được
+│   └── Chuẩn hóa ảnh
+│
+├── 04. AI Inference
+│   ├── RAD-DINO encoder
+│   ├── Task-specific head
+│   ├── Class probabilities
+│   ├── Confidence
+│   └── Uncertainty flag
+│
+├── 05. Explainability
+│   ├── Heatmap
+│   ├── Ảnh gốc
+│   ├── Overlay
+│   └── Bật/tắt độ trong suốt
+│
+├── 06. Similar Cases
+│   ├── Trích xuất CLS embedding
+│   ├── Tìm kiếm trong FAISS
+│   ├── Lọc đúng task/population
+│   ├── Trả về top-K
+│   └── Hiển thị
+│       ├── Ảnh tham chiếu
+│       ├── Mã ca
+│       ├── Nhãn đã biết
+│       ├── Nguồn dữ liệu
+│       └── Similarity score
+│
+├── 07. Doctor Review
+│   ├── Accept AI suggestion
+│   ├── Edit diagnosis
+│   ├── Add note
+│   ├── Mark uncertain
+│   └── Finalize case
+│
+├── 08. Structured Report
+│   ├── Patient/case metadata
+│   ├── AI result
+│   ├── Confidence
+│   ├── Similar cases
+│   ├── Doctor conclusion
+│   ├── Disclaimer
+│   └── Export PDF
+│
+└── 09. Case History
+    ├── Tìm kiếm ca
+    ├── Lọc theo ngày
+    ├── Lọc theo task
+    ├── Lọc theo diagnosis
+    └── Mở lại kết quả
+```
+
+## Quy tắc cho similar cases
+
+Dữ liệu công khai hiện có không cung cấp đầy đủ điều trị và outcome. Vì vậy demo chỉ được hiển thị:
+
+* Nhãn bệnh đã biết.
+* Nguồn dataset.
+* Mã ca ẩn danh.
+* Similarity score.
+* Ảnh tham chiếu.
+
+Không được tự tạo “treatment” hoặc “recovered” rồi trình bày như dữ liệu thật.
+
+---
+
+# 11. Chốt report generation
+
+Phiên bản đầu không dùng LLM tự do để viết chẩn đoán.
+
+```text
+Report Generator V1
+└── Template-based structured report
+    ├── AI predicted class
+    ├── Confidence
+    ├── Warning khi confidence thấp
+    ├── Top similar cases
+    ├── Doctor note
+    └── Doctor conclusion
+```
+
+Lý do:
+
+* Giảm hallucination.
+* Dễ kiểm thử.
+* Dễ giải thích với hội đồng.
+* Không làm project vượt quá 1 tháng.
+* Không biến paper thành bài toán report generation.
+
+LLM report generation chỉ nằm trong Future Work.
+
+---
+
+# 12. Chốt những thứ không làm trong phiên bản này
+
+```text
+Out of Scope
+├── Federated learning
+├── Continual weight update sau mỗi ca
+├── Online learning trực tiếp
+├── Tự động học từ kết luận bác sĩ
+├── Mô hình sinh báo cáo lớn
+├── PACS/DICOM hospital integration thật
+├── Triển khai tại bệnh viện
+├── Mobile application
+├── Segmentation tổn thương đầy đủ
+├── Một model 4-class trộn trẻ em và người lớn
+└── So sánh hơn 5 model deep learning
+```
+
+Doctor feedback vẫn được lưu lại:
+
+```text
+Doctor feedback
+└── feedback_log database
+    ├── AI prediction
+    ├── Doctor correction
+    ├── Timestamp
+    └── Model version
+```
+
+Nhưng không tự động cập nhật trọng số. Đây là dữ liệu cho nghiên cứu continual learning sau này.
+
+---
+
+# 13. Master execution tree — toàn bộ tiến độ 4 tuần
+
+```text
+CXR-COPILOT PROJECT
+│
+├── WEEK 1 — DATA AND END-TO-END BASELINE
+│   │
+│   ├── Day 1 — Freeze scope
+│   │   ├── Chốt research questions
+│   │   ├── Chốt datasets
+│   │   ├── Chốt model list
+│   │   ├── Tạo Git repository
+│   │   └── Tạo configuration files
+│   │
+│   ├── Day 2 — Download and manifest
+│   │   ├── Download Kermany
+│   │   ├── Download Shenzhen
+│   │   ├── Download Montgomery
+│   │   ├── Ghi source/license
+│   │   └── Tạo images_manifest.csv
+│   │
+│   ├── Day 3 — Data audit
+│   │   ├── Kiểm tra file hỏng
+│   │   ├── Kiểm tra kích thước ảnh
+│   │   ├── Kiểm tra class distribution
+│   │   ├── Tìm exact duplicate
+│   │   └── Tìm near-duplicate bằng perceptual hash
+│   │
+│   ├── Day 4 — Data splitting
+│   │   ├── Tạo Kermany train/val/test
+│   │   ├── Tạo Shenzhen train/val
+│   │   ├── Khóa Montgomery external test
+│   │   ├── Xuất split CSV
+│   │   └── Viết leakage audit report
+│   │
+│   ├── Day 5 — DataLoader
+│   │   ├── Preprocessing
+│   │   ├── Augmentation
+│   │   ├── Class weights
+│   │   └── Batch visualization
+│   │
+│   ├── Day 6 — First baseline
+│   │   ├── Train ResNet18
+│   │   ├── Evaluate validation
+│   │   ├── Save checkpoint
+│   │   └── Verify complete pipeline
+│   │
+│   └── Day 7 — Evaluation framework
+│       ├── Metrics
+│       ├── Confusion matrix
+│       ├── ROC
+│       ├── Bootstrap CI
+│       └── Experiment logging
+│
+├── WEEK 2 — MODEL BENCHMARK
+│   │
+│   ├── Day 8 — Classical baseline
+│   │   ├── HOG feature extraction
+│   │   └── SVM training
+│   │
+│   ├── Day 9 — DenseNet121
+│   │   ├── Smoke test
+│   │   └── Full training
+│   │
+│   ├── Day 10 — ConvNeXt V2-Tiny
+│   │   ├── Smoke test
+│   │   └── Full training
+│   │
+│   ├── Day 11 — RAD-DINO linear probe
+│   │   ├── Freeze encoder
+│   │   ├── Train classifier head
+│   │   └── Export embeddings
+│   │
+│   ├── Day 12 — RAD-DINO partial fine-tuning
+│   │   ├── Unfreeze last 2 blocks
+│   │   ├── Low learning rate
+│   │   └── Monitor overfitting
+│   │
+│   ├── Day 13 — Three-seed runs
+│   │   ├── Seed 42
+│   │   ├── Seed 7
+│   │   └── Seed 123
+│   │
+│   └── Day 14 — Aggregate results
+│       ├── Mean ± std
+│       ├── Confidence intervals
+│       ├── Calibration
+│       ├── Efficiency table
+│       └── Select product candidate
+│
+├── WEEK 3 — EXTERNAL VALIDATION, RETRIEVAL AND APPLICATION
+│   │
+│   ├── Day 15 — External TB validation
+│   │   ├── Lock selected checkpoint
+│   │   ├── Test on Montgomery
+│   │   ├── Calculate generalization gap
+│   │   └── Analyze errors
+│   │
+│   ├── Day 16 — Similar-case index
+│   │   ├── Extract RAD-DINO embeddings
+│   │   ├── Normalize vectors
+│   │   ├── Build FAISS index
+│   │   └── Store metadata
+│   │
+│   ├── Day 17 — Retrieval evaluation
+│   │   ├── Precision@K
+│   │   ├── Recall@K
+│   │   ├── mAP@K
+│   │   └── Inspect retrieval failures
+│   │
+│   ├── Day 18 — Explainability
+│   │   ├── CNN Grad-CAM
+│   │   ├── RAD-DINO token/feature heatmap
+│   │   ├── Correct examples
+│   │   ├── Incorrect examples
+│   │   └── Low-confidence examples
+│   │
+│   ├── Day 19 — Backend
+│   │   ├── FastAPI
+│   │   ├── Inference service
+│   │   ├── Retrieval service
+│   │   ├── Case database
+│   │   └── PDF report endpoint
+│   │
+│   ├── Day 20 — Frontend
+│   │   ├── Dashboard
+│   │   ├── New case workflow
+│   │   ├── Analysis workspace
+│   │   └── Similar cases panel
+│   │
+│   └── Day 21 — Doctor workflow
+│       ├── Edit result
+│       ├── Approve result
+│       ├── Save feedback
+│       ├── Case history
+│       └── Export report
+│
+└── WEEK 4 — FINALIZATION AND PAPER
+    │
+    ├── Day 22 — Full integration
+    │   ├── Frontend ↔ backend
+    │   ├── Backend ↔ models
+    │   ├── Backend ↔ FAISS
+    │   └── Backend ↔ database
+    │
+    ├── Day 23 — Product testing
+    │   ├── Invalid images
+    │   ├── Missing metadata
+    │   ├── Low confidence
+    │   ├── Model failure
+    │   └── Retrieval failure
+    │
+    ├── Day 24 — Results freeze
+    │   ├── Final tables
+    │   ├── Final figures
+    │   ├── External validation
+    │   ├── Retrieval examples
+    │   └── Model card
+    │
+    ├── Day 25 — Paper Methods
+    │   ├── Data
+    │   ├── Models
+    │   ├── Training
+    │   ├── Retrieval
+    │   └── Evaluation
+    │
+    ├── Day 26 — Paper Results
+    │   ├── Classification
+    │   ├── External validation
+    │   ├── Retrieval
+    │   ├── Calibration
+    │   └── Efficiency
+    │
+    ├── Day 27 — Discussion
+    │   ├── Answer RQ1–RQ4
+    │   ├── Domain confounding
+    │   ├── Data limitations
+    │   ├── Clinical limitations
+    │   └── Future work
+    │
+    └── Day 28 — Release
+        ├── Clean repository
+        ├── Pin environment
+        ├── Record demo video
+        ├── Prepare defense slides
+        ├── Tag GitHub release
+        └── Finalize preprint
+```
+
+---
+
+# 14. Chốt cấu trúc repository
+
+```text
+cxr-copilot/
+│
+├── README.md
+├── CLAUDE.md
+├── LICENSE
+├── model_card.md
+├── pyproject.toml
+├── requirements.txt
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+│
+├── configs/
+│   ├── base.yaml
+│   ├── pneumonia.yaml
+│   ├── tuberculosis.yaml
+│   ├── models/
+│   │   ├── resnet18.yaml
+│   │   ├── densenet121.yaml
+│   │   ├── convnextv2_tiny.yaml
+│   │   └── rad_dino.yaml
+│   └── app.yaml
+│
+├── data/
+│   ├── README.md
+│   ├── raw/
+│   ├── interim/
+│   ├── processed/
+│   ├── manifests/
+│   │   ├── images_manifest.csv
+│   │   ├── duplicates.csv
+│   │   └── exclusions.csv
+│   └── splits/
+│       ├── pneumonia_train.csv
+│       ├── pneumonia_val.csv
+│       ├── pneumonia_test.csv
+│       ├── tb_train.csv
+│       ├── tb_val.csv
+│       └── tb_external_montgomery.csv
+│
+├── src/
+│   └── cxr_copilot/
+│       ├── data/
+│       │   ├── download.py
+│       │   ├── manifest.py
+│       │   ├── audit.py
+│       │   ├── deduplicate.py
+│       │   ├── split.py
+│       │   ├── datasets.py
+│       │   └── transforms.py
+│       │
+│       ├── models/
+│       │   ├── factory.py
+│       │   ├── heads.py
+│       │   ├── resnet.py
+│       │   ├── densenet.py
+│       │   ├── convnext.py
+│       │   └── rad_dino.py
+│       │
+│       ├── training/
+│       │   ├── train.py
+│       │   ├── losses.py
+│       │   ├── optimizer.py
+│       │   ├── callbacks.py
+│       │   └── checkpoint.py
+│       │
+│       ├── evaluation/
+│       │   ├── classification.py
+│       │   ├── calibration.py
+│       │   ├── bootstrap.py
+│       │   ├── external_validation.py
+│       │   ├── plots.py
+│       │   └── efficiency.py
+│       │
+│       ├── retrieval/
+│       │   ├── embeddings.py
+│       │   ├── build_index.py
+│       │   ├── search.py
+│       │   ├── metrics.py
+│       │   └── metadata.py
+│       │
+│       ├── explainability/
+│       │   ├── gradcam.py
+│       │   ├── vit_heatmap.py
+│       │   ├── overlays.py
+│       │   └── sanity_checks.py
+│       │
+│       └── inference/
+│           ├── pipeline.py
+│           ├── uncertainty.py
+│           └── schemas.py
+│
+├── experiments/
+│   ├── run_classical.py
+│   ├── run_benchmark.py
+│   ├── run_three_seeds.py
+│   ├── run_rad_dino_ablation.py
+│   ├── run_external_validation.py
+│   ├── run_retrieval.py
+│   └── aggregate_results.py
+│
+├── app/
+│   ├── backend/
+│   │   ├── main.py
+│   │   ├── api/
+│   │   ├── services/
+│   │   ├── database/
+│   │   └── reports/
+│   │
+│   └── frontend/
+│       ├── dashboard/
+│       ├── cases/
+│       ├── analysis/
+│       ├── similar-cases/
+│       └── components/
+│
+├── tests/
+│   ├── test_data.py
+│   ├── test_models.py
+│   ├── test_inference.py
+│   ├── test_retrieval.py
+│   └── test_api.py
+│
+├── results/
+│   ├── metrics/
+│   ├── figures/
+│   ├── confusion_matrices/
+│   ├── roc_curves/
+│   ├── calibration/
+│   ├── retrieval/
+│   ├── explainability/
+│   └── logs/
+│
+├── notebooks/
+│   ├── 01_data_eda.ipynb
+│   ├── 02_duplicate_analysis.ipynb
+│   ├── 03_model_error_analysis.ipynb
+│   └── 04_embedding_visualization.ipynb
+│
+└── paper/
+    ├── manuscript.tex
+    ├── references.bib
+    ├── tables/
+    ├── figures/
+    ├── supplementary/
+    └── reproducibility_statement.md
+```
+
+---
+
+# 15. Chốt Definition of Done
+
+```text
+Project hoàn thành khi
+├── Data audit và split có thể tái tạo
+├── Có HOG+SVM baseline
+├── Có kết quả ResNet18
+├── Có kết quả DenseNet121
+├── Có kết quả ConvNeXt V2-Tiny
+├── Có RAD-DINO linear probe
+├── Có RAD-DINO partial fine-tuning
+├── Mỗi deep model chạy đủ 3 seeds
+├── Có mean ± std và 95% CI
+├── Có external validation Montgomery
+├── Có calibration analysis
+├── Có FAISS similar-case retrieval
+├── Có retrieval metrics
+├── Có explainability examples
+├── Có dashboard và patient workspace
+├── Có doctor review workflow
+├── Có PDF report
+├── Có model card
+├── Có demo video
+├── Có paper draft hoàn chỉnh
+└── Có GitHub release chạy được
+```
+
+---
+
+# 16. Tóm tắt quyết định cuối cùng
+
+```text
+FINAL DECISION
+│
+├── Product
+│   └── CXR-Copilot
+│
+├── Main AI Core
+│   └── RAD-DINO
+│
+├── Product architecture
+│   ├── One shared encoder
+│   ├── Pneumonia task head
+│   ├── TB task head
+│   ├── Similar-case retrieval
+│   ├── Explainability
+│   └── Doctor-in-the-loop
+│
+├── Experimental models
+│   ├── HOG + SVM
+│   ├── ResNet18
+│   ├── DenseNet121
+│   ├── ConvNeXt V2-Tiny
+│   └── RAD-DINO
+│
+├── Main paper focus
+│   ├── Classification
+│   ├── External generalization
+│   ├── Representation quality
+│   └── Similar-case retrieval
+│
+├── Main scientific metric
+│   └── Macro-F1
+│
+├── Main external validation
+│   └── Train Shenzhen → test Montgomery
+│
+├── Main product model
+│   └── RAD-DINO partial fine-tuning
+│
+└── Explicitly excluded
+    ├── Federated learning
+    ├── Continual weight updates
+    ├── LLM free-form diagnosis
+    ├── Real hospital deployment
+    └── One mixed pediatric/adult 4-class classifier
+```
