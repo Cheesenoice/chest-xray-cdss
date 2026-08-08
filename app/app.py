@@ -82,7 +82,7 @@ def main():
         
         if uploaded_file is not None:
             image = Image.open(uploaded_file).convert("RGB")
-            st.image(image, caption="Uploaded Chest X-Ray", use_column_width=True)
+            st.image(image, caption="Uploaded Chest X-Ray", use_container_width=True)
 
     with col2:
         st.subheader("2. Diagnostic Inference & Explainability")
@@ -126,7 +126,7 @@ def main():
             cam_overlay = show_cam_on_image(rgb_float, grayscale_cam, use_rgb=True)
 
             st.subheader("3. Grad-CAM Pathological Heatmap")
-            st.image(cam_overlay, caption=f"Grad-CAM Attention Map ({backbone})", use_column_width=True)
+            st.image(cam_overlay, caption=f"Grad-CAM Attention Map ({backbone})", use_container_width=True)
 
             # Export PDF Report
             st.markdown("---")
