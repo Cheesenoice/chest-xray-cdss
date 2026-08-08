@@ -29,9 +29,10 @@ Last updated: **2026-07-31**
 |---|---|---|---|
 | **Phase 1** | Data pipeline + Patient-level split + EDA | ✅ Complete | `manifest.csv`, `split_report.md`, `01_eda_kermany.ipynb`, `02_eda_pulmonary.ipynb` |
 | **Phase 2** | Classical ML Baseline + Multi-backbone Benchmark (3 seeds) + Grad-CAM | ✅ Complete | `classical_baseline.md` (Acc: 83.51% int / 10.87% ext), `benchmark_summary.md`, `gradcam_gallery.png` |
-| **Phase 3** | Clinical Decision Support Layer + 4-Tab Web App + PDF Report | ✅ Complete | `app/app.py` (DICOM, CLAHE, Triage, Plotly), `app/report.py` (PDF Report) |
+| **Phase 3** | Clinical Decision Support Layer + Streamlit App + PDF Report | ✅ Complete | `app/app.py` (DICOM, CLAHE, Triage, Plotly), `app/report.py` (PDF Report) |
 | **Phase 4** | Scientific Integrity Audit + Paper Manuscript + Defense Presentation | ✅ Complete | `src/audit_pipeline.py` (100% PASS), `paper/paper_draft.md`, `model_card.md` |
-| **Phase 5 (Advanced)** | LLM Radiology Draft Findings + VQA / Error Analysis Extension | 💡 Future Vision | Pre-formulated radiology draft findings, Medical VQA concept framework |
+| **Phase 5 (Next)** | Full-Stack Production Platform (FastAPI Backend + React/Next.js Frontend) | 📌 Planned (New Folder) | Dedicated folder: FastAPI REST API, React/Next.js Radiology Workstation, PostgreSQL |
+| **Phase 6 (Advanced)** | LLM Radiology Draft Findings + VQA / Error Analysis Extension | 💡 Future Vision | Pre-formulated radiology draft findings, Medical VQA concept framework |
 
 ---
 

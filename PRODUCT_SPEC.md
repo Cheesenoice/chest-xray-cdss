@@ -11,35 +11,30 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                          USER / CLINICIAN INTERFACE                         │
-│                    (Radiologist / Primary-Care Physician)                   │
+│                          1. FRONTEND WORKSTATION                            │
+│                     (React / Next.js + TypeScript UI)                       │
 └──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-                        1. Upload DICOM / JPEG / PNG Scan
-                        2. Patient Metadata (Age, SpO2, Temp, Symptoms)
-                                       │
+                                       │ REST API (JSON / Multipart)
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                       MEDVISION AI PLATFORM (STREAMLIT)                     │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-       ┌───────────────────────────────┼───────────────────────────────┐
-       ▼                               ▼                               ▼
-┌──────────────┐              ┌────────────────┐              ┌────────────────┐
-│   MODULE 1   │              │    MODULE 2    │              │    MODULE 3    │
-│ Medical Image│              │  AI Diagnosis  │              │ Explainable AI │
-│  Management  │              │     Engine     │              │ (Grad-CAM XAI) │
-└──────┬───────┘              └───────┬────────┘              └───────┬────────┘
-       │                              │                               │
-       └──────────────────────────────┼───────────────────────────────┘
-                                       │
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                   MODULE 4: CLINICAL DECISION SUPPORT LAYER                 │
-│  - Triage Priority (RED / YELLOW / GREEN)                                    │
-│  - Risk Scoring Engine (Combines AI Probability + SpO2 + Temp + Symptoms)   │
-│  - Automated 1-Click PDF Report Generator (app/report.py)                   │
-└──────────────────────────────────────┬──────────────────────────────────────┘
+│                          2. BACKEND API SERVICE                             │
+│                         (FastAPI / Python Service)                          │
+└──────────────┬───────────────────────┬───────────────────────┬──────────────┘
+               │                       │                       │
+               ▼                       ▼                       ▼
+┌──────────────────────────────┐ ┌───────────┐ ┌──────────────────────────────┐
+│  AI Inference & Grad-CAM     │ │ Database  │ │    Object / Image Storage    │
+│  (PyTorch + CUDA GPU Engine) │ │(PostgreSQL)│ │ (Local / MinIO DICOM Storage)│
+└──────────────────────────────┘ └───────────┘ └──────────────────────────────┘
+```
+
+### Deployment Architecture & Folder Separation
+
+- **Prototype Demo App (Current):** `app/app.py` (Streamlit standalone web app for rapid defense demonstration & testing).
+- **Full-Stack Production Platform (Planned Next Phase):** Dedicated production folder (e.g. `web-platform/` or `production-app/`):
+  - `backend/`: FastAPI REST API endpoints (`/api/v1/predict`, `/api/v1/gradcam`, `/api/v1/patients`, `/api/v1/report`).
+  - `frontend/`: React / Next.js radiology workstation client with DICOM viewport and interactive canvas.
+  - `database/`: PostgreSQL schema for patient histories and audit logs.
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
