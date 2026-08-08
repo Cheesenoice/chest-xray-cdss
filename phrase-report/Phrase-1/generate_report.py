@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -13,23 +14,29 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls, qn
 
-# Ensure output directory exists
 OUT_DIR = Path(__file__).resolve().parent
 IMG_DIR = OUT_DIR / "report_figures"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
-print("[INFO] Generating high-resolution academic charts for report...")
+GRADCAM_IMG_PATH = Path("results/figures/gradcam_samples/gradcam_gallery_densenet121.png")
+
+print("[INFO] Generating high-resolution academic charts in English and Vietnamese...")
 
 plt.style.use('seaborn-v0_8-whitegrid')
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size'] = 10
 
-# Chart 1: Class Distribution
-fig, ax = plt.subplots(figsize=(6.5, 3.8), dpi=300)
-classes = ['Normal', 'Bact. Pneumonia', 'Viral Pneumonia', 'Tuberculosis']
+# ---------------------------------------------------------
+# Chart 1: Class Distribution (EN & VN)
+# ---------------------------------------------------------
+classes_en = ['Normal', 'Bact. Pneumonia', 'Viral Pneumonia', 'Tuberculosis']
+classes_vn = ['Bình thường', 'Viêm phổi Vi khuẩn', 'Viêm phổi Virus', 'Lao phổi']
 counts = [1835, 2760, 1485, 820]
 colors = ['#2ecc71', '#e74c3c', '#e67e22', '#9b59b6']
-bars = ax.bar(classes, counts, color=colors, width=0.55, edgecolor='black', linewidth=0.8)
+
+# English Chart
+fig, ax = plt.subplots(figsize=(6.5, 3.8), dpi=300)
+bars = ax.bar(classes_en, counts, color=colors, width=0.55, edgecolor='black', linewidth=0.8)
 ax.set_title('Dataset Image Distribution across Pathology Classes (Total: 6,900 Scans)', fontsize=11, fontweight='bold', pad=10)
 ax.set_ylabel('Number of Unique Scans', fontsize=10, fontweight='bold')
 ax.set_ylim(0, 3200)
@@ -37,20 +44,38 @@ for bar in bars:
     yval = bar.get_height()
     ax.text(bar.get_x() + bar.get_width()/2.0, yval + 50, f'{yval:,}', ha='center', va='bottom', fontsize=9, fontweight='bold')
 plt.tight_layout()
-chart1_path = IMG_DIR / "chart_class_distribution.png"
-plt.savefig(chart1_path, dpi=300)
+chart1_en = IMG_DIR / "chart_class_distribution_EN.png"
+plt.savefig(chart1_en, dpi=300)
 plt.close()
 
-# Chart 2: Benchmark Comparison
+# Vietnamese Chart
 fig, ax = plt.subplots(figsize=(6.5, 3.8), dpi=300)
+bars = ax.bar(classes_vn, counts, color=colors, width=0.55, edgecolor='black', linewidth=0.8)
+ax.set_title('Phân bố Ảnh X-quang theo Nhóm Bệnh lý (Tổng số: 6.900 Ảnh sạch)', fontsize=11, fontweight='bold', pad=10)
+ax.set_ylabel('Số lượng Ảnh sạch Unique', fontsize=10, fontweight='bold')
+ax.set_ylim(0, 3200)
+for bar in bars:
+    yval = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2.0, yval + 50, f'{yval:,}', ha='center', va='bottom', fontsize=9, fontweight='bold')
+plt.tight_layout()
+chart1_vn = IMG_DIR / "chart_class_distribution_VN.png"
+plt.savefig(chart1_vn, dpi=300)
+plt.close()
+
+# ---------------------------------------------------------
+# Chart 2: Benchmark Comparison (EN & VN)
+# ---------------------------------------------------------
 models = ['ResNet-18', 'DenseNet-121', 'EfficientNet-B0', 'HOG + SVM']
 internal_auc = [0.9538, 0.9512, 0.9493, 0.9470]
 external_auc = [0.7606, 0.8296, 0.7208, 0.6052]
 x = np.arange(len(models))
 width = 0.35
+
+# English Chart
+fig, ax = plt.subplots(figsize=(6.5, 3.8), dpi=300)
 rects1 = ax.bar(x - width/2, internal_auc, width, label='Internal Test AUC (934 Scans)', color='#2563EB', edgecolor='black', linewidth=0.8)
 rects2 = ax.bar(x + width/2, external_auc, width, label='External Montgomery OOD AUC (414 Scans)', color='#EF4444', edgecolor='black', linewidth=0.8)
-ax.set_title('Model Generalization Performance: Internal AUC vs External Montgomery OOD AUC', fontsize=10, fontweight='bold', pad=10)
+ax.set_title('Model Generalization: Internal AUC vs External Montgomery OOD AUC', fontsize=10, fontweight='bold', pad=10)
 ax.set_ylabel('Macro AUC Score', fontsize=10, fontweight='bold')
 ax.set_xticks(x)
 ax.set_xticklabels(models, fontweight='bold')
@@ -63,515 +88,529 @@ for rect in rects2:
     h = rect.get_height()
     ax.text(rect.get_x() + rect.get_width()/2.0, h + 0.01, f'{h:.4f}', ha='center', va='bottom', fontsize=8, fontweight='bold')
 plt.tight_layout()
-chart2_path = IMG_DIR / "chart_benchmark_comparison.png"
-plt.savefig(chart2_path, dpi=300)
+chart2_en = IMG_DIR / "chart_benchmark_comparison_EN.png"
+plt.savefig(chart2_en, dpi=300)
 plt.close()
 
-print(f"[SUCCESS] Saved charts to {IMG_DIR}")
+# Vietnamese Chart
+fig, ax = plt.subplots(figsize=(6.5, 3.8), dpi=300)
+rects1 = ax.bar(x - width/2, internal_auc, width, label='AUC Tập Kiểm thử Nội bộ (934 ảnh)', color='#2563EB', edgecolor='black', linewidth=0.8)
+rects2 = ax.bar(x + width/2, external_auc, width, label='AUC Tập Độc lập Montgomery (414 ảnh)', color='#EF4444', edgecolor='black', linewidth=0.8)
+ax.set_title('Khả năng Tổng quát hóa: AUC Nội bộ vs AUC Ngoại viện Montgomery OOD', fontsize=10, fontweight='bold', pad=10)
+ax.set_ylabel('Điểm Macro AUC', fontsize=10, fontweight='bold')
+ax.set_xticks(x)
+ax.set_xticklabels(models, fontweight='bold')
+ax.set_ylim(0.4, 1.05)
+ax.legend(loc='upper right', frameon=True)
+for rect in rects1:
+    h = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width()/2.0, h + 0.01, f'{h:.4f}', ha='center', va='bottom', fontsize=8, fontweight='bold')
+for rect in rects2:
+    h = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width()/2.0, h + 0.01, f'{h:.4f}', ha='center', va='bottom', fontsize=8, fontweight='bold')
+plt.tight_layout()
+chart2_vn = IMG_DIR / "chart_benchmark_comparison_VN.png"
+plt.savefig(chart2_vn, dpi=300)
+plt.close()
 
-# Document Assembly Functions
-doc = docx.Document()
+# ---------------------------------------------------------
+# Diagram 3: Architecture Diagram (EN & VN)
+# ---------------------------------------------------------
+def draw_architecture_diagram(lang="EN"):
+    fig, ax = plt.subplots(figsize=(6.5, 4.0), dpi=300)
+    ax.axis('off')
+    
+    # Draw blocks
+    boxes = [
+        (0.05, 0.65, 0.25, 0.25, '1. Image Input\n(DICOM / PNG / JPEG)\n+ Patient Vitals' if lang=="EN" else '1. Ảnh Y tế Đầu vào\n(DICOM / PNG / JPEG)\n+ Chỉ số Bệnh nhân', '#EBF8FF', '#3182CE'),
+        (0.375, 0.65, 0.25, 0.25, '2. AI Engine\n(DenseNet-121 / ResNet)\nPyTorch CUDA' if lang=="EN" else '2. Động cơ AI\n(DenseNet-121 / ResNet)\nPyTorch CUDA', '#FEFCBF', '#D69E2E'),
+        (0.70, 0.65, 0.25, 0.25, '3. Grad-CAM XAI\nPathological Heatmap\nLocalization' if lang=="EN" else '3. Giải thích Grad-CAM\nBản đồ nhiệt khoanh vùng\nTổn thương', '#FEEBC8', '#DD6B20'),
+        (0.20, 0.15, 0.28, 0.28, '4. Clinical Triage Engine\n(Red / Yellow / Green Alert)\nDecision Support' if lang=="EN" else '4. Phân tầng Rủi ro Triage\n(Cảnh báo Đỏ/Vàng/Xanh)\nHỗ trợ Quyết định', '#FED7D7', '#E53E3E'),
+        (0.55, 0.15, 0.28, 0.28, '5. Diagnostic Export\n(PDF Summary Report\n+ Plotly Dashboard)' if lang=="EN" else '5. Xuất Kết quả\n(Báo cáo PDF Lâm sàng\n+ Plotly Dashboard)', '#C6F6D5', '#38A169')
+    ]
+    
+    for x, y, w, h, text, bg, border in boxes:
+        rect = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02", facecolor=bg, edgecolor=border, linewidth=1.5)
+        ax.add_patch(rect)
+        ax.text(x + w/2, y + h/2, text, ha='center', va='center', fontsize=8.5, fontweight='bold', color='#1A202C')
+        
+    # Arrows
+    arrow_props = dict(arrowstyle="->", lw=1.5, color='#4A5568')
+    ax.annotate('', xy=(0.375, 0.775), xytext=(0.30, 0.775), arrowprops=arrow_props)
+    ax.annotate('', xy=(0.70, 0.775), xytext=(0.625, 0.775), arrowprops=arrow_props)
+    ax.annotate('', xy=(0.34, 0.43), xytext=(0.50, 0.65), arrowprops=arrow_props)
+    ax.annotate('', xy=(0.69, 0.43), xytext=(0.50, 0.65), arrowprops=arrow_props)
+    ax.annotate('', xy=(0.55, 0.29), xytext=(0.48, 0.29), arrowprops=arrow_props)
 
-# Configure Normal Style
-style_normal = doc.styles['Normal']
-font = style_normal.font
-font.name = 'Times New Roman'
-font.size = Pt(11)
-font.color.rgb = RGBColor(0, 0, 0)
-style_normal.paragraph_format.line_spacing = 1.15
-style_normal.paragraph_format.space_after = Pt(6)
-style_normal.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    plt.tight_layout()
+    path = IMG_DIR / f"diagram_architecture_{lang}.png"
+    plt.savefig(path, dpi=300)
+    plt.close()
 
-# Set 1-Inch Margins
-for s in doc.sections:
-    s.top_margin = Inches(1)
-    s.bottom_margin = Inches(1)
-    s.left_margin = Inches(1)
-    s.right_margin = Inches(1)
+draw_architecture_diagram("EN")
+draw_architecture_diagram("VN")
 
-def add_bottom_border(paragraph, color_hex="000000", size="16"):
-    pPr = paragraph._p.get_or_add_pPr()
-    pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="{size}" w:space="4" w:color="{color_hex}"/></w:pBdr>')
-    pPr.append(pBdr)
+print(f"[SUCCESS] Saved architecture diagrams to {IMG_DIR}")
 
-def add_heading_1(text):
-    h = doc.add_heading('', level=1)
-    h.paragraph_format.space_before = Pt(18)
-    h.paragraph_format.space_after = Pt(8)
-    h.paragraph_format.keep_with_next = True
-    r = h.add_run(text)
-    r.font.name = 'Times New Roman'
-    r.font.size = Pt(16)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(0, 0, 0)
-    add_bottom_border(h, color_hex="000000", size="16")
-    return h
+# ---------------------------------------------------------
+# Document Builder Class
+# ---------------------------------------------------------
+def create_word_report(lang="VN"):
+    doc = docx.Document()
+    
+    # Style configuration
+    style_normal = doc.styles['Normal']
+    font = style_normal.font
+    font.name = 'Times New Roman'
+    font.size = Pt(11)
+    font.color.rgb = RGBColor(0, 0, 0)
+    style_normal.paragraph_format.line_spacing = 1.15
+    style_normal.paragraph_format.space_after = Pt(6)
+    style_normal.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
-def add_heading_2(text):
-    h = doc.add_heading('', level=2)
-    h.paragraph_format.space_before = Pt(14)
-    h.paragraph_format.space_after = Pt(6)
-    h.paragraph_format.keep_with_next = True
-    r = h.add_run(text)
-    r.font.name = 'Times New Roman'
-    r.font.size = Pt(13)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(0, 0, 0)
-    return h
+    for s in doc.sections:
+        s.top_margin = Inches(1)
+        s.bottom_margin = Inches(1)
+        s.left_margin = Inches(1)
+        s.right_margin = Inches(1)
 
-def add_heading_3(text):
-    h = doc.add_heading('', level=3)
-    h.paragraph_format.space_before = Pt(10)
-    h.paragraph_format.space_after = Pt(4)
-    h.paragraph_format.keep_with_next = True
-    r = h.add_run(text)
-    r.font.name = 'Times New Roman'
-    r.font.size = Pt(11)
-    r.font.bold = True
-    r.font.italic = True
-    r.font.color.rgb = RGBColor(0, 0, 0)
-    return h
+    def add_bottom_border(paragraph, color_hex="000000", size="16"):
+        pPr = paragraph._p.get_or_add_pPr()
+        pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="{size}" w:space="4" w:color="{color_hex}"/></w:pBdr>')
+        pPr.append(pBdr)
 
-def set_cell_shading(cell, color_hex):
-    tcPr = cell._element.get_or_add_tcPr()
-    shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{color_hex}"/>')
-    tcPr.append(shd)
+    def add_h1(text):
+        h = doc.add_heading('', level=1)
+        h.paragraph_format.space_before = Pt(18)
+        h.paragraph_format.space_after = Pt(8)
+        h.paragraph_format.keep_with_next = True
+        r = h.add_run(text)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(16)
+        r.font.bold = True
+        r.font.color.rgb = RGBColor(0, 0, 0)
+        add_bottom_border(h, color_hex="000000", size="16")
+        return h
 
-def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
-    tcPr = cell._element.get_or_add_tcPr()
-    tcMar = parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="{top}" w:type="dxa"/><w:bottom w:w="{bottom}" w:type="dxa"/><w:left w:w="{left}" w:type="dxa"/><w:right w:w="{right}" w:type="dxa"/></w:tcMar>')
-    tcPr.append(tcMar)
+    def add_h2(text):
+        h = doc.add_heading('', level=2)
+        h.paragraph_format.space_before = Pt(14)
+        h.paragraph_format.space_after = Pt(6)
+        h.paragraph_format.keep_with_next = True
+        r = h.add_run(text)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(13)
+        r.font.bold = True
+        r.font.color.rgb = RGBColor(0, 0, 0)
+        return h
 
-def add_callout_box(title, text):
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
-    tbl.allow_autofit = False
-    cell = tbl.cell(0, 0)
-    cell.width = Inches(6.5)
-    set_cell_shading(cell, "F9F9F9")
-    set_cell_margins(cell, top=140, bottom=140, left=200, right=200)
-    tcPr = cell._element.get_or_add_tcPr()
-    borders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:left w:val="single" w:sz="28" w:space="0" w:color="000000"/><w:top w:val="none"/><w:right w:val="none"/><w:bottom w:val="none"/></w:tcBorders>')
-    tcPr.append(borders)
-    p = cell.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p.paragraph_format.line_spacing = 1.15
-    p.paragraph_format.space_after = Pt(2)
-    r1 = p.add_run(f"★ {title.upper()}: ")
-    r1.font.name = 'Times New Roman'
-    r1.font.size = Pt(10)
-    r1.font.bold = True
-    r1.font.color.rgb = RGBColor(0, 0, 0)
-    r2 = p.add_run(text)
-    r2.font.name = 'Times New Roman'
-    r2.font.size = Pt(10)
-    r2.font.italic = True
-    r2.font.color.rgb = RGBColor(0, 0, 0)
-    p_after = doc.add_paragraph()
-    p_after.paragraph_format.space_after = Pt(4)
+    def add_h3(text):
+        h = doc.add_heading('', level=3)
+        h.paragraph_format.space_before = Pt(10)
+        h.paragraph_format.space_after = Pt(4)
+        h.paragraph_format.keep_with_next = True
+        r = h.add_run(text)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(11)
+        r.font.bold = True
+        r.font.italic = True
+        r.font.color.rgb = RGBColor(0, 0, 0)
+        return h
 
-def add_omml_equation(omml_str, eq_num_str):
-    tbl = doc.add_table(rows=1, cols=2)
-    tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
-    tbl.allow_autofit = False
-    cell_eq = tbl.cell(0, 0)
-    cell_num = tbl.cell(0, 1)
-    cell_eq.width = Inches(5.7)
-    cell_num.width = Inches(0.8)
-    for c in [cell_eq, cell_num]:
-        tcPr = c._element.get_or_add_tcPr()
-        borders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:left w:val="none"/><w:top w:val="none"/><w:right w:val="none"/><w:bottom w:val="none"/></w:tcBorders>')
+    def set_cell_shading(cell, color_hex):
+        tcPr = cell._element.get_or_add_tcPr()
+        shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{color_hex}"/>')
+        tcPr.append(shd)
+
+    def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
+        tcPr = cell._element.get_or_add_tcPr()
+        tcMar = parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="{top}" w:type="dxa"/><w:bottom w:w="{bottom}" w:type="dxa"/><w:left w:w="{left}" w:type="dxa"/><w:right w:w="{right}" w:type="dxa"/></w:tcMar>')
+        tcPr.append(tcMar)
+
+    def add_callout(title, text):
+        tbl = doc.add_table(rows=1, cols=1)
+        tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        tbl.allow_autofit = False
+        cell = tbl.cell(0, 0)
+        cell.width = Inches(6.5)
+        set_cell_shading(cell, "F9F9F9")
+        set_cell_margins(cell, top=140, bottom=140, left=200, right=200)
+        tcPr = cell._element.get_or_add_tcPr()
+        borders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:left w:val="single" w:sz="28" w:space="0" w:color="000000"/><w:top w:val="none"/><w:right w:val="none"/><w:bottom w:val="none"/></w:tcBorders>')
         tcPr.append(borders)
-        set_cell_margins(c, top=40, bottom=40, left=40, right=40)
-    p_eq = cell_eq.paragraphs[0]
-    p_eq.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_eq.paragraph_format.space_after = Pt(2)
-    
-    # Mathematical equation presentation
-    r = p_eq.add_run(omml_str)
-    r.font.name = 'Times New Roman'
-    r.font.size = Pt(11)
-    r.font.italic = True
-    
-    p_num = cell_num.paragraphs[0]
-    p_num.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p_num.paragraph_format.space_after = Pt(2)
-    r_num = p_num.add_run(eq_num_str)
-    r_num.font.name = 'Times New Roman'
-    r_num.font.size = Pt(10)
-    p_after = doc.add_paragraph()
-    p_after.paragraph_format.space_after = Pt(4)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        p.paragraph_format.line_spacing = 1.15
+        p.paragraph_format.space_after = Pt(2)
+        r1 = p.add_run(f"★ {title.upper()}: ")
+        r1.font.name = 'Times New Roman'
+        r1.font.size = Pt(10)
+        r1.font.bold = True
+        r1.font.color.rgb = RGBColor(0, 0, 0)
+        r2 = p.add_run(text)
+        r2.font.name = 'Times New Roman'
+        r2.font.size = Pt(10)
+        r2.font.italic = True
+        r2.font.color.rgb = RGBColor(0, 0, 0)
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
-def format_cell(cell, text, bold=False, italic=False, size=9.5, align=WD_ALIGN_PARAGRAPH.LEFT, shade=None):
-    if shade:
-        set_cell_shading(cell, shade)
-    set_cell_margins(cell, top=80, bottom=80, left=120, right=120)
-    p = cell.paragraphs[0]
-    p.alignment = align
-    p.paragraph_format.space_after = Pt(2)
-    p.paragraph_format.line_spacing = 1.1
-    r = p.add_run(text)
-    r.font.name = 'Times New Roman'
-    r.font.size = Pt(size)
-    r.font.bold = bold
-    r.font.italic = italic
-    r.font.color.rgb = RGBColor(0, 0, 0)
-    return r
+    def add_omml(omml_str, eq_num_str):
+        tbl = doc.add_table(rows=1, cols=2)
+        tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        tbl.allow_autofit = False
+        cell_eq = tbl.cell(0, 0)
+        cell_num = tbl.cell(0, 1)
+        cell_eq.width = Inches(5.7)
+        cell_num.width = Inches(0.8)
+        for c in [cell_eq, cell_num]:
+            tcPr = c._element.get_or_add_tcPr()
+            borders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:left w:val="none"/><w:top w:val="none"/><w:right w:val="none"/><w:bottom w:val="none"/></w:tcBorders>')
+            tcPr.append(borders)
+            set_cell_margins(c, top=40, bottom=40, left=40, right=40)
+        p_eq = cell_eq.paragraphs[0]
+        p_eq.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_eq.paragraph_format.space_after = Pt(2)
+        r = p_eq.add_run(omml_str)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(11)
+        r.font.italic = True
+        p_num = cell_num.paragraphs[0]
+        p_num.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_num.paragraph_format.space_after = Pt(2)
+        r_num = p_num.add_run(eq_num_str)
+        r_num.font.name = 'Times New Roman'
+        r_num.font.size = Pt(10)
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
-def add_table_grid(headers, rows_data, col_widths, title_caption=None):
-    if title_caption:
-        p_cap = doc.add_paragraph()
-        p_cap.paragraph_format.space_before = Pt(8)
-        p_cap.paragraph_format.space_after = Pt(4)
-        p_cap.paragraph_format.keep_with_next = True
-        r_cap = p_cap.add_run(title_caption)
-        r_cap.font.name = 'Times New Roman'
-        r_cap.font.size = Pt(10)
-        r_cap.font.bold = True
+    def add_table_data(headers, rows_data, col_widths, title_caption=None):
+        if title_caption:
+            p_cap = doc.add_paragraph()
+            p_cap.paragraph_format.space_before = Pt(8)
+            p_cap.paragraph_format.space_after = Pt(4)
+            p_cap.paragraph_format.keep_with_next = True
+            r_cap = p_cap.add_run(title_caption)
+            r_cap.font.name = 'Times New Roman'
+            r_cap.font.size = Pt(10)
+            r_cap.font.bold = True
 
-    tbl = doc.add_table(rows=len(rows_data) + 1, cols=len(headers))
-    tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
-    tbl.allow_autofit = False
+        tbl = doc.add_table(rows=len(rows_data) + 1, cols=len(headers))
+        tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        tbl.allow_autofit = False
 
-    # Format Header Row
-    hdr_cells = tbl.rows[0].cells
-    for i, h_text in enumerate(headers):
-        hdr_cells[i].width = Inches(col_widths[i])
-        format_cell(hdr_cells[i], h_text, bold=True, size=9.5, align=WD_ALIGN_PARAGRAPH.CENTER, shade="E6E6E6")
-
-    # Format Data Rows
-    for r_idx, row_values in enumerate(rows_data):
-        row_cells = tbl.rows[r_idx + 1].cells
-        for c_idx, val in enumerate(row_values):
-            row_cells[c_idx].width = Inches(col_widths[c_idx])
-            align = WD_ALIGN_PARAGRAPH.LEFT if c_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER
-            bold_flag = True if c_idx == 0 or "**" in str(val) else False
-            clean_val = str(val).replace("**", "")
-            format_cell(row_cells[c_idx], clean_val, bold=bold_flag, size=9.5, align=align)
-
-    # Set Thin Horizontal Borders (No Vertical Borders)
-    for r_idx, row in enumerate(tbl.rows):
-        for cell in row.cells:
-            tcPr = cell._element.get_or_add_tcPr()
-            bdr_xml = f'<w:tcBorders {nsdecls("w")}><w:top w:val="single" w:sz="4" w:space="0" w:color="D0D0D0"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="D0D0D0"/><w:left w:val="none"/><w:right w:val="none"/></w:tcBorders>'
-            tcPr.append(parse_xml(bdr_xml))
-
-    p_space = doc.add_paragraph()
-    p_space.paragraph_format.space_after = Pt(6)
-
-def add_figure(image_path, caption_text):
-    p_img = doc.add_paragraph()
-    p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_img.paragraph_format.space_before = Pt(12)
-    p_img.paragraph_format.space_after = Pt(4)
-    run_img = p_img.add_run()
-    run_img.add_picture(str(image_path), width=Inches(6.0))
-
-    p_cap = doc.add_paragraph()
-    p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_cap.paragraph_format.space_after = Pt(10)
-    r_cap = p_cap.add_run(caption_text)
-    r_cap.font.name = 'Times New Roman'
-    r_cap.font.size = Pt(9.5)
-    r_cap.font.italic = True
-
-def add_p(text, bold=False, italic=False, space_after=6):
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p.paragraph_format.line_spacing = 1.15
-    p.paragraph_format.space_after = Pt(space_after)
-    
-    # Simple markdown parser for bold **text** and underline <u>text</u>
-    tokens = text.split("<u>")
-    for t_idx, token in enumerate(tokens):
-        if "</u>" in token:
-            u_parts = token.split("</u>")
-            u_text = u_parts[0]
-            rest_text = u_parts[1]
-            
-            r_u = p.add_run(u_text)
-            r_u.font.name = 'Times New Roman'
-            r_u.font.size = Pt(11)
-            r_u.font.underline = True
-            
-            r_rest = p.add_run(rest_text)
-            r_rest.font.name = 'Times New Roman'
-            r_rest.font.size = Pt(11)
-        else:
-            r = p.add_run(token)
+        for i, h_text in enumerate(headers):
+            cell = tbl.rows[0].cells[i]
+            cell.width = Inches(col_widths[i])
+            set_cell_shading(cell, "E6E6E6")
+            set_cell_margins(cell, top=80, bottom=80, left=120, right=120)
+            p = cell.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_after = Pt(2)
+            r = p.add_run(h_text)
             r.font.name = 'Times New Roman'
-            r.font.size = Pt(11)
-            r.font.bold = bold
-            r.font.italic = italic
-    return p
+            r.font.size = Pt(9.5)
+            r.font.bold = True
 
-print("[INFO] Assembling Progress Report Document Sections...")
+        for r_idx, row_values in enumerate(rows_data):
+            for c_idx, val in enumerate(row_values):
+                cell = tbl.rows[r_idx + 1].cells[c_idx]
+                cell.width = Inches(col_widths[c_idx])
+                set_cell_margins(cell, top=80, bottom=80, left=120, right=120)
+                p = cell.paragraphs[0]
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT if c_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER
+                p.paragraph_format.space_after = Pt(2)
+                bold_flag = True if c_idx == 0 or "**" in str(val) else False
+                clean_val = str(val).replace("**", "")
+                r = p.add_run(clean_val)
+                r.font.name = 'Times New Roman'
+                r.font.size = Pt(9.5)
+                r.font.bold = bold_flag
 
-# =========================================================
-# DOCUMENT TITLE & METADATA
-# =========================================================
-p_title = doc.add_paragraph()
-p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_title.paragraph_format.space_before = Pt(12)
-p_title.paragraph_format.space_after = Pt(4)
-r_title = p_title.add_run("PROGRESS REPORT 1: MEDVISION AI — INTELLIGENT RADIOLOGY CLINICAL DECISION SUPPORT PLATFORM")
-r_title.font.name = 'Times New Roman'
-r_title.font.size = Pt(20)
-r_title.font.bold = True
-add_bottom_border(p_title, color_hex="000000", size="24")
+        for row in tbl.rows:
+            for cell in row.cells:
+                tcPr = cell._element.get_or_add_tcPr()
+                bdr_xml = f'<w:tcBorders {nsdecls("w")}><w:top w:val="single" w:sz="4" w:space="0" w:color="D0D0D0"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="D0D0D0"/><w:left w:val="none"/><w:right w:val="none"/></w:tcBorders>'
+                tcPr.append(parse_xml(bdr_xml))
 
-p_sub = doc.add_paragraph()
-p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_sub.paragraph_format.space_after = Pt(14)
-r_sub = p_sub.add_run("An Explainable Deep Learning System for Chest X-Ray Pathology Screening, Zero-Leakage Benchmarking, and Out-of-Distribution External Validation")
-r_sub.font.name = 'Times New Roman'
-r_sub.font.size = Pt(11)
-r_sub.font.italic = True
-r_sub.font.color.rgb = RGBColor(100, 100, 100)
+        doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-# Metadata Box Table
-meta_tbl = doc.add_table(rows=1, cols=4)
-meta_tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
-meta_tbl.allow_autofit = False
-meta_data = [
-    ("PROJECT TITLE", "MedVision CDSS Platform"),
-    ("AUTHOR / INSTITUTION", "Graduation Thesis Candidate"),
-    ("EXECUTION ENVIRONMENT", "PyTorch 2.12 + RTX 5050 GPU"),
-    ("REPORT PHASE", "Phase 1 Progress Report")
-]
-for i, (hdr, val) in enumerate(meta_data):
-    cell = meta_tbl.cell(0, i)
-    cell.width = Inches(1.625)
-    set_cell_shading(cell, "F0F4F8")
-    set_cell_margins(cell, top=100, bottom=100, left=100, right=100)
-    p = cell.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_hdr = p.add_run(f"{hdr}\n")
-    r_hdr.font.name = 'Times New Roman'
-    r_hdr.font.size = Pt(8.5)
-    r_hdr.font.bold = True
-    r_hdr.font.color.rgb = RGBColor(100, 100, 100)
-    r_val = p.add_run(val)
-    r_val.font.name = 'Times New Roman'
-    r_val.font.size = Pt(10)
-    r_val.font.bold = True
+    def add_fig(img_path, caption):
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.paragraph_format.space_before = Pt(10)
+        p_img.paragraph_format.space_after = Pt(4)
+        run_img = p_img.add_run()
+        run_img.add_picture(str(img_path), width=Inches(5.8))
 
-p_space = doc.add_paragraph()
-p_space.paragraph_format.space_after = Pt(12)
+        p_cap = doc.add_paragraph()
+        p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cap.paragraph_format.space_after = Pt(10)
+        r_cap = p_cap.add_run(caption)
+        r_cap.font.name = 'Times New Roman'
+        r_cap.font.size = Pt(9.5)
+        r_cap.font.italic = True
 
-# Executive Summary Box
-add_callout_box("EXECUTIVE PROGRESS SUMMARY", 
-    "This Progress Report 1 documents the complete theoretical design, data pipeline hygiene, zero-leakage patient-level partitioning, multi-backbone benchmarking, classical machine learning baseline, Grad-CAM explainability module, interactive 4-tab Streamlit web application, and empirical verification audit for MedVision AI. Across 6,900 deduplicated medical X-ray scans, our deep transfer learning models (ResNet-18, DenseNet-121, EfficientNet-B0) achieved superior internal test performance (Macro AUC > 0.95, Macro F1 > 84%). On a 100% held-out out-of-distribution external test set (Montgomery County, USA), DenseNet-121 demonstrated robust feature retention with an External AUC of 0.8296 ± 0.0613, vastly outperforming traditional handcrafted HOG+SVM features (External AUC 0.6052). All data partitions and evaluation code have passed a 100% automated scientific integrity audit.")
+    def add_p(text, bold=False, italic=False):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        p.paragraph_format.line_spacing = 1.15
+        p.paragraph_format.space_after = Pt(6)
+        
+        tokens = text.split("<u>")
+        for t_idx, token in enumerate(tokens):
+            if "</u>" in token:
+                u_parts = token.split("</u>")
+                r_u = p.add_run(u_parts[0])
+                r_u.font.name = 'Times New Roman'
+                r_u.font.size = Pt(11)
+                r_u.font.underline = True
+                r_rest = p.add_run(u_parts[1])
+                r_rest.font.name = 'Times New Roman'
+                r_rest.font.size = Pt(11)
+            else:
+                r = p.add_run(token)
+                r.font.name = 'Times New Roman'
+                r.font.size = Pt(11)
+                r.font.bold = bold
+                r.font.italic = italic
 
-# =========================================================
-# SECTION 1: INTRODUCTION & PROBLEM FORMULATION
-# =========================================================
-add_heading_1("1. Introduction and Clinical Problem Formulation")
+    # BUILD CONTENT
+    if lang == "VN":
+        # TITLE
+        p_title = doc.add_paragraph()
+        p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_title.paragraph_format.space_before = Pt(12)
+        p_title.paragraph_format.space_after = Pt(4)
+        r_title = p_title.add_run("BÁO CÁO TIẾN ĐỘ ĐỢT 1: HỆ THỐNG AI ĐA MÔ HÌNH HỖ TRỢ QUYẾT ĐỊNH LÂM SÀNG TRONG PHÂN TÍCH ẢNH X-QUANG NGỰC (MEDVISION AI)")
+        r_title.font.name = 'Times New Roman'
+        r_title.font.size = Pt(18)
+        r_title.font.bold = True
+        add_bottom_border(p_title, color_hex="000000", size="24")
 
-add_heading_2("1.1 Clinical Background and Healthcare Need")
-add_p("Chest radiography (X-ray) represents the single most frequently requested diagnostic imaging modality worldwide. In primary care clinics, emergency departments, and rural medical centers, rapid interpretation of chest X-rays is critical for detecting life-threatening thoracic diseases, including bacterial pneumonia, viral pneumonia, and pulmonary tuberculosis (TB). However, in many developing regions and underserved community hospitals, the severe shortage of certified radiologists results in delayed diagnoses, treatment bottlenecks, and increased patient mortality (<u>Wang et al., 2022</u>).")
+        p_sub = doc.add_paragraph()
+        p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_sub.paragraph_format.space_after = Pt(14)
+        r_sub = p_sub.add_run("Báo cáo Giải trình Tiến độ Thực nghiệm Mô hình Deep Learning, Kiểm thuật Chống Rò rỉ Bệnh nhân và Kiến trúc Sản phẩm CDSS")
+        r_sub.font.name = 'Times New Roman'
+        r_sub.font.size = Pt(11)
+        r_sub.font.italic = True
+        r_sub.font.color.rgb = RGBColor(100, 100, 100)
 
-add_p("Automated Clinical Decision Support Systems (CDSS) powered by deep learning offer a promising solution by triaging chest radiographies, providing rapid preliminary predictions, and alerting attending physicians to urgent abnormal opacities. However, despite high reported nominal accuracies in literature, clinical adoption of medical AI models remains severely constrained by significant methodological flaws.")
+        # Metadata Box
+        meta_tbl = doc.add_table(rows=1, cols=4)
+        meta_tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        meta_tbl.allow_autofit = False
+        meta_data = [
+            ("TÊN ĐỀ TÀI", "MedVision AI CDSS Platform"),
+            ("NGƯỜI THỰC HIỆN", "Sinh viên Bảo vệ Đồ án"),
+            ("MÔI TRƯỜNG THỰC NGHIỆM", "PyTorch 2.12 + RTX 5050 GPU"),
+            ("ĐỢT BÁO CÁO", "Báo cáo Tiến độ Đợt 1")
+        ]
+        for i, (hdr, val) in enumerate(meta_data):
+            cell = meta_tbl.cell(0, i)
+            cell.width = Inches(1.625)
+            set_cell_shading(cell, "F0F4F8")
+            set_cell_margins(cell, top=100, bottom=100, left=100, right=100)
+            p = cell.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r_hdr = p.add_run(f"{hdr}\n")
+            r_hdr.font.name = 'Times New Roman'
+            r_hdr.font.size = Pt(8.5)
+            r_hdr.font.bold = True
+            r_hdr.font.color.rgb = RGBColor(100, 100, 100)
+            r_val = p.add_run(val)
+            r_val.font.name = 'Times New Roman'
+            r_val.font.size = Pt(10)
+            r_val.font.bold = True
 
-add_heading_2("1.2 Methodological Gaps in Medical AI Literature")
-add_p("A rigorous survey of recent medical imaging publications reveals three primary flaws that invalidate many published benchmarks:")
-add_p("1. Data Leakage across Splits: Many studies execute random image-level splitting instead of patient-level partitioning. When multiple radiographies from the same patient appear in both training and test sets, deep neural networks memorize patient-specific anatomical signatures rather than pathological features, resulting in artificially inflated test metrics (<u>Kermany et al., 2018</u>).")
-add_p("2. Lack of Out-of-Distribution External Validation: Medical AI models are rarely evaluated on independent, unseen datasets acquired from different hospital sites, scanner manufacturers, or geographic populations. Models trained on single-center data suffer catastrophic performance drops when deployed in real-world clinical environments (<u>Jaeger et al., 2014</u>).")
-add_p("3. Black-Box Decision Making: Traditional classifiers provide isolated probability scores without visual spatial explanations, preventing clinicians from verifying whether the model is attending to actual lung pathologies or confounding background artifacts.")
+        doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-add_heading_2("1.3 Objectives and Core Scope of MedVision AI")
-add_p("To resolve these critical gaps, the MedVision AI platform is built around five core research and engineering objectives:")
-add_p("• Reproducible Multi-Class Pathology Benchmark: Multi-seed evaluation of 4 classes (Normal, Bacterial Pneumonia, Viral Pneumonia, Tuberculosis) across three pre-trained convolutional backbones (ResNet-18, DenseNet-121, EfficientNet-B0).")
-add_p("• Strict Zero-Leakage Patient Partitioning: Executing GroupShuffleSplit on patient IDs with MD5 hash checksum deduplication and automated assertion verification.")
-add_p("• Classical Machine Learning Baseline: Implementing handcrafted HOG feature extraction coupled with Support Vector Machines (SVM) to satisfy theoretical thesis requirements.")
-add_p("• Explainable AI (Grad-CAM): Visualizing spatial attention heatmaps overlaid on target convolutional layers (denseblock4) for pathological verification.")
-add_p("• Production-Grade Interactive Platform: Building a 4-tab Streamlit web application supporting DICOM (.dcm) files, CLAHE contrast filters, Plotly hospital analytics, priority triage banners, and 1-click PDF diagnostic report exports.")
+        add_callout("TÓM TẮT TIẾN ĐỘ THỰC NGHIỆM (DÀNH CHO GIÁO SƯ HƯỚNG DẪN)",
+            "Kính gửi Thầy/Cô Hướng dẫn: Báo cáo đợt 1 này tổng hợp toàn bộ kết quả thực nghiệm mô hình và kiến trúc hệ thống MedVision AI tính đến thời điểm hiện tại. Phần mô hình Deep Learning và kiểm thuật khoa học đã hoàn thành 100%: Chúng em đã tiền xử lý 6.900 ảnh X-quang sạch, thực hiện chia tập ở mức bệnh nhân (patient-level zero-leakage split) và kiểm thử độc lập trên bộ ảnh ngoạt viện Montgomery (OOD test set). Các mô hình ResNet-18, DenseNet-121, EfficientNet-B0 đạt AUC nội bộ > 0.95 và AUC ngoại viện 0.83 (vượt trội so với baseline HOG+SVM 0.60). Phần giao diện ứng dụng Web CDSS đã xây dựng khung 4-Tab chính và hiện đang trong giai đoạn hoàn thiện giao diện demo lâm sàng hoàn chỉnh.")
 
-# =========================================================
-# SECTION 2: THEORETICAL & ALGORITHMIC FOUNDATION
-# =========================================================
-add_heading_1("2. Theoretical and Algorithmic Foundation")
+        add_h1("1. Tổng Quan Tiến Độ Dự Án và Mục Tiêu")
+        add_p("Trong nghiên cứu y tế, việc áp dụng các mô hình học sâu vào phân tích ảnh X-quang ngực thường gặp phải khó khăn lớn về hiện tượng rò rỉ dữ liệu (data leakage) do chia tập ở mức ảnh thay vì mức bệnh nhân, cũng như thiếu tính giải thích (black-box model) và khả năng tổng quát hóa trên dữ liệu ngoại viện (<u>Kermany et al., 2018</u>).")
+        add_p("Để giải quyết bài toán này, đề tài MedVision AI được định vị không chỉ dừng lại ở một mô hình CNN phân loại đơn thuần, mà là một **Hệ thống AI Đa mô hình Hỗ trợ Phát hiện Bất thường, Giải thích Kết quả và Hỗ trợ Quyết định Lâm sàng từ Ảnh X-quang Ngực** hoàn chỉnh.")
 
-add_heading_2("2.1 Convolutional Neural Networks and Transfer Learning")
-add_p("Deep Convolutional Neural Networks (CNNs) construct hierarchical spatial feature representations directly from raw pixel intensity matrices. Given an input radiography tensor X in R^(C x H x W), a spatial convolution operation with kernel K in R^(C x k_h x k_w) is defined mathematically as:")
+        add_fig(IMG_DIR / "diagram_architecture_VN.png", "Hình 1.1: Sơ đồ kiến trúc tổng thể 5 khối chức năng của Hệ thống MedVision AI CDSS Platform.")
 
-add_omml_equation("Y(i, j) = sum_c sum_m sum_n X(c, i+m, j+n) . K(c, m, n) + b", "(2.1)")
+        add_h1("2. Kết Quả Xử Lý Dữ Liệu và Kiểm Thuật Chống Rò Rỉ Mức Bệnh Nhân")
+        add_p("Chúng em đã gom nhóm và tiền xử lý 12.788 ảnh X-quang thô từ 3 nguồn uy tín: Guangzhou Kermany (Trẻ em), Shenzhen No.3 Hospital (Người lớn), và Montgomery County (Người lớn, Mỹ) (<u>Jaeger et al., 2014</u>). Bằng cách tính mã băm MD5 128-bit, hệ thống đã lọc bỏ 5.888 ảnh trùng lặp, thu được 6.900 ảnh sạch unique.")
 
-add_p("In medical imaging tasks with limited annotated scans, training deep networks from scratch causes severe overfitting. Transfer learning leverages pre-trained ImageNet representations, fine-tuning feature extraction backbones to recognize subtle pulmonary consolidations and reticular opacities (<u>He et al., 2016</u>).")
+        add_fig(chart1_vn, "Hình 2.1: Phân bố số lượng ảnh sạch theo 4 nhóm bệnh lý (Tổng số: 6.900 ảnh X-quang sạch).")
 
-add_heading_2("2.2 Deep Feature Backbones Formulation")
-add_heading_3("2.2.1 ResNet-18 (Residual Learning)")
-add_p("Residual Networks introduce shortcut skip connections to solve the vanishing gradient problem in deep architectures. The residual block transformation is expressed as:")
+        add_table_data(
+            ["Tập Dữ liệu Split", "Bình thường", "Viêm phổi Vi khuẩn", "Viêm phổi Virus", "Lao phổi", "Tổng số Ảnh", "Số Bệnh nhân Unique"],
+            [
+                ["Tập Train (70%)", "1.325", "1.966", "1.060", "235", "4.586", "2.740"],
+                ["Tập Validation (15%)", "270", "411", "226", "59", "966", "587"],
+                ["Tập Test Nội bộ (15%)", "310", "383", "199", "42", "934", "588"],
+                ["Tập Test Ngoại viện (Montgomery)", "240", "0", "0", "174", "414", "138"]
+            ],
+            [1.5, 0.8, 0.9, 0.8, 0.8, 0.85, 0.85],
+            "Bảng 2.1: Thống kê chi tiết các tập dữ liệu được phân chia theo ID bệnh nhân (GroupShuffleSplit)."
+        )
 
-add_omml_equation("x_{l+1} = x_l + F(x_l, W_l)", "(2.2)")
+        add_p("Hệ thống đã chạy script kiểm thuật tự động (src/audit_pipeline.py) và xác nhận **PASS 100%** trên 4 tiêu chí: Giao tập bệnh nhân rỗng, Giao mã MD5 rỗng, 100% tập Montgomery cô lập ngoại viện, và Không chứa Data Augmentation ở tập Validation/Test.")
 
-add_p("where F represents stacked convolutional transformations. Skip connections allow gradients to flow unimpeded during backpropagation.")
+        add_h1("3. Kết Quả Thực Nghiệm Đánh Giá Mô Hình Deep Learning & Baseline")
+        add_p("Chúng em đã thực nghiệm huấn luyện 3 kiến trúc Deep Learning (ResNet-18, DenseNet-121, EfficientNet-B0) qua 3 random seeds (42, 7, 123) và so sánh trực tiếp với phương pháp ML truyền thống (HOG + SVM):")
 
-add_heading_3("2.2.2 DenseNet-121 (Dense Connectivity)")
-add_p("Dense Convolutional Networks establish direct connections from every layer to all subsequent layers within a dense block. The l-th layer receives the concatenated feature maps of all preceding layers:")
+        add_fig(chart2_vn, "Hình 3.1: So sánh điểm Macro AUC trên tập kiểm thử nội bộ và tập kiểm thử ngoại viện Montgomery (OOD).")
 
-add_omml_equation("x_l = H_l ( [x_0, x_1, x_2, ..., x_{l-1}] )", "(2.3)")
+        add_table_data(
+            ["Kiến trúc Mô hình", "Accuracy Nội bộ", "Precision (Macro)", "Recall (Macro)", "F1-Score (Macro)", "AUC Nội bộ", "AUC Montgomery (OOD)"],
+            [
+                ["ResNet-18", "84.98% ± 0.33%", "83.58% ± 0.41%", "84.89% ± 0.54%", "**84.09% ± 0.22%**", "**0.9538 ± 0.0020**", "0.7606 ± 0.0072"],
+                ["DenseNet-121", "84.55% ± 0.22%", "83.49% ± 1.15%", "83.28% ± 0.86%", "83.22% ± 0.55%", "0.9512 ± 0.0024", "**0.8296 ± 0.0613 (TỐT NHẤT)**"],
+                ["EfficientNet-B0", "83.83% ± 0.91%", "83.06% ± 1.08%", "82.48% ± 0.70%", "82.69% ± 0.88%", "0.9493 ± 0.0015", "0.7208 ± 0.0360"],
+                ["Baseline HOG + SVM", "83.51%", "80.98%", "78.33%", "79.40%", "0.9470", "0.6052 (SỤT GIẢM SÂU)"]
+            ],
+            [1.3, 0.85, 0.85, 0.85, 0.85, 0.9, 0.9],
+            "Bảng 3.1: Tổng hợp chỉ số thực nghiệm đa kiến trúc trên tập nội bộ và tập ngoại viện Montgomery."
+        )
 
-add_p("Dense feature reuse facilitates gradient propagation, substantially reduces parameter count (7.0M parameters for DenseNet-121 vs 25.6M for ResNet-50), and preserves low-level spatial detail critical for chest radiography interpretation (<u>Huang et al., 2017</u>).")
+        add_h1("4. Trực Quan Hóa Giải Thích Mô Hình (Grad-CAM Explainable AI)")
+        add_p("Để loại bỏ hiện tượng 'hộp đen' (black-box model), hệ thống tích hợp mô-đun Grad-CAM trích xuất bản đồ nhiệt chú ý không gian trên lớp Convolutional cuối (`denseblock4`). Hình 4.1 minh họa kết quả khoanh vùng tổn thương thực tế trên ảnh X-quang phổi của bệnh nhân:")
 
-add_heading_3("2.2.3 EfficientNet-B0 (Compound Scaling)")
-add_p("EfficientNet scales network depth d, width w, and image resolution r uniformly using a fixed compound coefficient phi:")
+        if GRADCAM_IMG_PATH.exists():
+            add_fig(GRADCAM_IMG_PATH, "Hình 4.1: Bản đồ nhiệt Grad-CAM trực quan hóa vùng phổi bị ảnh hưởng bởi thâm nhiễm và đám mờ tổn thương thực tế.")
 
-add_omml_equation("d = alpha^phi,   w = beta^phi,   r = gamma^phi   s.t.  alpha . beta^2 . gamma^2 approx 2", "(2.4)")
+        add_h1("5. Tiến Độ Phát Triển Sản Phẩm Demo Lâm Sàng (CDSS Web App)")
+        add_p("Hệ thống Demo Web ([app/app.py](file:///C:/Users/huynh/Desktop/Graduation/app/app.py)) đang được xây dựng theo kiến trúc 4-Tab hoàn chỉnh:")
+        add_p("• Tab 1 (Clinical Screening): Cho phép tải file DICOM (.dcm), PNG, JPEG, bật bộ lọc CLAHE tương phản, hiển thị Banner cảnh báo Triage (Đỏ/Vàng/Xanh) và xuất báo cáo PDF 1-Click.")
+        add_p("• Tab 2 (Hospital Analytics): Dashboard thống kê dịch tễ tương tác bằng Plotly.")
+        add_p("• Tab 3 (Benchmark Hub): Bảng so sánh trực tiếp các mô hình và thư viện Grad-CAM.")
+        add_p("• Tab 4 (Scientific Integrity): Trực quan hóa kết quả kiểm thuật và dự thảo bài báo khoa học chuẩn IMRaD.")
 
-add_heading_2("2.3 Explainable AI: Grad-CAM Mathematical Formulation")
-add_p("Gradient-weighted Class Activation Mapping (Grad-CAM) calculates spatial attention weights alpha_k^c for feature map A^k in the final convolutional layer with respect to class score Y^c:")
+        add_h1("6. Kế Hoạch Tiếp Theo và Kết Luận")
+        add_p("Đến thời điểm hiện tại, phần **Huấn luyện Mô hình Deep Learning, Kiểm thuật Chống Rò rỉ Dữ liệu và Viết Dự thảo Bài báo Khoa học** đã hoàn tất 100%. Trong đợt tiếp theo, chúng em sẽ tập trung tinh chỉnh hoàn thiện giao diện demo CDSS và chuẩn bị các slide thuyết minh bảo vệ trước hội đồng.")
 
-add_omml_equation("alpha_k^c = (1 / Z) * sum_i sum_j ( d Y^c / d A_{i,j}^k )", "(2.5)")
+        # References
+        add_h1("Tài Liệu Tham Khảo")
+        add_p("<u>Candemir, S., Jaeger, S., Palaniappan, K., et al.</u> (2014). Lung segmentation in chest radiographs using anatomical atlases. IEEE Transactions on Medical Imaging, 33(2), 577-590.")
+        add_p("<u>He, K., Zhang, X., Ren, S., & Sun, J.</u> (2016). Deep residual learning for image recognition. IEEE CVPR (pp. 770-778).")
+        add_p("<u>Huang, G., Liu, Z., Van Der Maaten, L., & Weinberger, K. Q.</u> (2017). Densely connected convolutional networks. IEEE CVPR (pp. 4700-4708).")
+        add_p("<u>Jaeger, S., Candemir, S., Antani, S., et al.</u> (2014). Two public chest X-ray datasets for computer-aided screening of pulmonary diseases. Quantitative Imaging in Medicine & Surgery, 4(6), 475-477.")
+        add_p("<u>Kermany, D. S., Goldbaum, M., Zhang, W., et al.</u> (2018). Identifying medical diagnoses and treating diseases by image-based deep learning. Cell, 172(5), 1122-1131.")
+        add_p("<u>Selvaraju, R. R., Cogswell, M., Das, A., et al.</u> (2017). Grad-CAM: Visual explanations from deep networks via gradient-based localization. IEEE ICCV (pp. 618-626).")
 
-add_p("The final Grad-CAM spatial heatmap is generated by taking a rectified linear combination of feature activation maps:")
+        out_path = OUT_DIR / "Bao_Cao_Tien_Do_Dot_1_VN.docx"
+        doc.save(str(out_path))
+        print(f"[SUCCESS] Exported Vietnamese Progress Report 1 to: {out_path}")
 
-add_omml_equation("L_{Grad-CAM}^c = ReLU ( sum_k alpha_k^c A^k )", "(2.6)")
+    else: # ENGLISH REPORT
+        p_title = doc.add_paragraph()
+        p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_title.paragraph_format.space_before = Pt(12)
+        p_title.paragraph_format.space_after = Pt(4)
+        r_title = p_title.add_run("PROGRESS REPORT 1: MEDVISION AI — INTELLIGENT RADIOLOGY CLINICAL DECISION SUPPORT PLATFORM")
+        r_title.font.name = 'Times New Roman'
+        r_title.font.size = Pt(18)
+        r_title.font.bold = True
+        add_bottom_border(p_title, color_hex="000000", size="24")
 
-add_p("The ReLU activation isolates features that positively correlate with the target pathology while filtering out irrelevant background structures (<u>Selvaraju et al., 2017</u>).")
+        p_sub = doc.add_paragraph()
+        p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_sub.paragraph_format.space_after = Pt(14)
+        r_sub = p_sub.add_run("Experimental Progress Report on Deep Learning Benchmarks, Zero-Leakage Data Audit, and CDSS Product Architecture")
+        r_sub.font.name = 'Times New Roman'
+        r_sub.font.size = Pt(11)
+        r_sub.font.italic = True
+        r_sub.font.color.rgb = RGBColor(100, 100, 100)
 
-add_heading_2("2.4 Classical Machine Learning Baseline: HOG + SVM")
-add_p("To benchmark deep learning against traditional handcrafted features, we compute Histogram of Oriented Gradients (HOG). Local gradient magnitudes m(x,y) and orientations theta(x,y) are calculated via image Sobel derivatives:")
+        # Metadata Box
+        meta_tbl = doc.add_table(rows=1, cols=4)
+        meta_tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        meta_tbl.allow_autofit = False
+        meta_data = [
+            ("PROJECT TITLE", "MedVision AI CDSS Platform"),
+            ("AUTHOR / APPLICANT", "Graduation Thesis Candidate"),
+            ("EXECUTION ENVIRONMENT", "PyTorch 2.12 + RTX 5050 GPU"),
+            ("REPORT PHASE", "Progress Report Phase 1")
+        ]
+        for i, (hdr, val) in enumerate(meta_data):
+            cell = meta_tbl.cell(0, i)
+            cell.width = Inches(1.625)
+            set_cell_shading(cell, "F0F4F8")
+            set_cell_margins(cell, top=100, bottom=100, left=100, right=100)
+            p = cell.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r_hdr = p.add_run(f"{hdr}\n")
+            r_hdr.font.name = 'Times New Roman'
+            r_hdr.font.size = Pt(8.5)
+            r_hdr.font.bold = True
+            r_hdr.font.color.rgb = RGBColor(100, 100, 100)
+            r_val = p.add_run(val)
+            r_val.font.name = 'Times New Roman'
+            r_val.font.size = Pt(10)
+            r_val.font.bold = True
 
-add_omml_equation("m(x,y) = sqrt( G_x^2 + G_y^2 ),   theta(x,y) = arctan ( G_y / G_x )", "(2.7)")
+        doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-add_p("Extracted HOG vectors and 32-bin intensity histograms are normalized using StandardScaler and classified via a Radial Basis Function (RBF) Support Vector Machine:")
+        add_callout("EXECUTIVE PROGRESS SUMMARY FOR ADVISOR / PROFESSOR",
+            "Dear Thesis Advisor/Professor: This Phase 1 Progress Report synthesizes our complete experimental findings and system architecture for MedVision AI. The deep learning model training, scientific data integrity audit, and classical ML benchmarks are 100% complete and clean: Across 6,900 deduplicated scans partitioned by patient ID, DenseNet-121 achieved an internal AUC of 0.9512 and an out-of-distribution external Montgomery AUC of 0.8296 (outperforming classical HOG+SVM AUC of 0.6052). The Streamlit CDSS Web App user interface is built across 4 functional tabs and is undergoing final UI integration.")
 
-add_omml_equation("K(x, x') = exp ( - gamma || x - x' ||^2 )", "(2.8)")
+        add_h1("1. Project Scope and System Architecture")
+        add_p("MedVision AI is formulated as a multi-model Clinical Decision Support System combining deep transfer learning, Grad-CAM explainability, zero-leakage data audits, and clinical risk triage (<u>Kermany et al., 2018</u>).")
 
-add_heading_2("2.5 Multi-Class Evaluation Metrics")
-add_p("Model performance is evaluated across five standard metrics. Macro-averaged F1 Score and Macro AUC handle class imbalance transparently:")
+        add_fig(IMG_DIR / "diagram_architecture_EN.png", "Figure 1.1: Overall 5-module architecture diagram of the MedVision AI CDSS Platform.")
 
-add_omml_equation("F1_{macro} = (1 / K) * sum_{k=1}^K [ 2 * ( P_k * R_k ) / ( P_k + R_k ) ]", "(2.9)")
+        add_h1("2. Data Hygiene and Patient-Level Partitioning Statistics")
+        add_p("Across 12,788 raw scans, MD5 checksum deduplication removed 5,888 duplicates, yielding 6,900 clean unique scans (<u>Jaeger et al., 2014</u>).")
 
-# =========================================================
-# SECTION 3: DATA HYGIENE & ZERO-LEAKAGE PARTITIONING
-# =========================================================
-add_heading_1("3. Data Hygiene, Deduplication, and Zero-Leakage Partitioning")
+        add_fig(chart1_en, "Figure 2.1: Image count distribution across four pathology classes (Total: 6,900 clean scans).")
 
-add_heading_2("3.1 Raw Dataset Acquisition")
-add_p("We aggregate public medical radiographies from three distinct sources:")
-add_p("1. Kermany Chest X-Ray Dataset: 5,863 pediatric chest radiographies from Guangzhou Women and Children's Medical Center (CC BY 4.0). Includes Normal, Bacterial Pneumonia, and Viral Pneumonia (<u>Kermany et al., 2018</u>).")
-add_p("2. Shenzhen Hospital Dataset (NLM/NIH): 662 adult chest radiographies (336 TB, 326 Normal) from Shenzhen No.3 People's Hospital (<u>Jaeger et al., 2014</u>).")
-add_p("3. Montgomery County Dataset (NLM/NIH): 138 adult chest radiographies (58 TB, 80 Normal) from Montgomery County Health Department, Maryland, USA (<u>Candemir et al., 2014</u>).")
+        add_table_data(
+            ["Dataset Split", "Normal", "Bact. Pneu.", "Viral Pneu.", "Tuberculosis", "Total Scans", "Unique Patients"],
+            [
+                ["Train Set (70%)", "1,325", "1,966", "1,060", "235", "4,586", "2,740"],
+                ["Validation Set (15%)", "270", "411", "226", "59", "966", "587"],
+                ["Internal Test Set (15%)", "310", "383", "199", "42", "934", "588"],
+                ["External Test (Montgomery)", "240", "0", "0", "174", "414", "138"]
+            ],
+            [1.5, 0.8, 0.9, 0.8, 0.8, 0.85, 0.85],
+            "Table 2.1: Zero-leakage patient-level dataset partition statistics."
+        )
 
-add_heading_2("3.2 MD5 Content Checksum Deduplication")
-add_p("Duplicate scans across datasets act as a major source of data leakage. We compute 128-bit MD5 content hashes for all raw image files. Out of 12,788 scanned raw files, exactly 5,888 duplicate images were identified and removed, yielding a clean dataset of 6,900 unique radiographies.")
+        add_h1("3. Empirical Multi-Backbone Benchmarks & Classical ML Comparison")
+        add_p("Deep learning models were trained across 3 random seeds (42, 7, 123) and benchmarked against handcrafted HOG+SVM features:")
 
-add_heading_2("3.3 Patient-Level Partitioning Protocol")
-add_p("Patient IDs are parsed from filenames using regular expressions (person{N} for Kermany, CHN_{id} for Shenzhen, MCU_{id} for Montgomery). Partitioning is executed using GroupShuffleSplit with groups = patient_id to prevent any patient's radiographies from straddling split boundaries.")
+        add_fig(chart2_en, "Figure 3.1: Internal Test Macro AUC vs External Montgomery Out-of-Distribution Macro AUC.")
 
-add_figure(chart1_path, "Figure 3.1: Distribution of clean unique radiography scans across four pathology classes (Total: 6,900 scans).")
+        add_table_data(
+            ["Architecture", "Internal Acc", "Precision", "Recall", "F1 Score", "Internal AUC", "External Montgomery AUC"],
+            [
+                ["ResNet-18", "84.98% ± 0.33%", "83.58%", "84.89%", "**84.09% ± 0.22%**", "**0.9538 ± 0.0020**", "0.7606 ± 0.0072"],
+                ["DenseNet-121", "84.55% ± 0.22%", "83.49%", "83.28%", "83.22% ± 0.55%", "0.9512 ± 0.0024", "**0.8296 ± 0.0613 (BEST)**"],
+                ["EfficientNet-B0", "83.83% ± 0.91%", "83.06%", "82.48%", "82.69% ± 0.88%", "0.9493 ± 0.0015", "0.7208 ± 0.0360"],
+                ["HOG + SVM Baseline", "83.51%", "80.98%", "78.33%", "79.40%", "0.9470", "0.6052 (Collapse)"]
+            ],
+            [1.3, 0.85, 0.85, 0.85, 0.85, 0.9, 0.9],
+            "Table 3.1: Benchmark metrics comparison on internal and external test sets."
+        )
 
-add_table_grid(
-    ["Split Set", "Normal", "Bacterial Pneu.", "Viral Pneu.", "Tuberculosis", "Total Scans", "Unique Patients"],
-    [
-        ["Train Set (70%)", "1,325", "1,966", "1,060", "235", "4,586", "2,740"],
-        ["Validation Set (15%)", "270", "411", "226", "59", "966", "587"],
-        ["Internal Test Set (15%)", "310", "383", "199", "42", "934", "588"],
-        ["External Test (Montgomery)", "240", "0", "0", "174", "414", "138"]
-    ],
-    [1.4, 0.8, 0.9, 0.8, 0.9, 0.85, 0.85],
-    "Table 3.1: Final zero-leakage patient-level dataset partition statistics."
-)
+        add_h1("4. Explainable AI: Grad-CAM Localization")
+        if GRADCAM_IMG_PATH.exists():
+            add_fig(GRADCAM_IMG_PATH, "Figure 4.1: Grad-CAM pathological visual heatmap overlays on chest X-ray scans.")
 
-add_heading_2("3.4 Automated Scientific Audit Verification")
-add_p("To guarantee absolute scientific integrity, we created an automated audit verification script (src/audit_pipeline.py). The audit script executes automated assertion tests verifying four criteria:")
-add_p("• Patient ID Non-Overlap: Assert intersection of patient ID sets across Train, Val, Test, and External is EMPTY (PASS).")
-add_p("• MD5 Hash Non-Overlap: Assert intersection of MD5 checksums across all split pairs is EMPTY (PASS).")
-add_p("• External Site Isolation: Assert 100% of Montgomery scans reside exclusively in external_test.csv (PASS).")
-add_p("• Transform Hygiene: Assert validation/testing data loaders contain ZERO data augmentation (Resize + Normalize only) (PASS).")
+        add_h1("5. Product Status & Next Action Plan")
+        add_p("Deep learning model training, patient-level data audit, and draft paper writing are 100% complete. The Streamlit web demo UI is fully functional and undergoing final design enhancements.")
 
-# =========================================================
-# SECTION 4: SYSTEM ARCHITECTURE & UI WORKFLOW DESIGN
-# =========================================================
-add_heading_1("4. System Architecture and Production UI Workflow Design")
+        # References
+        add_h1("References")
+        add_p("<u>Candemir, S., et al.</u> (2014). Lung segmentation in chest radiographs. IEEE TMI, 33(2), 577-590.")
+        add_p("<u>He, K., et al.</u> (2016). Deep residual learning. IEEE CVPR (pp. 770-778).")
+        add_p("<u>Huang, G., et al.</u> (2017). Densely connected convolutional networks. IEEE CVPR (pp. 4700-4708).")
+        add_p("<u>Kermany, D. S., et al.</u> (2018). Identifying medical diagnoses by image-based deep learning. Cell, 172(5), 1122-1131.")
+        add_p("<u>Selvaraju, R. R., et al.</u> (2017). Grad-CAM. IEEE ICCV (pp. 618-626).")
 
-add_heading_2("4.1 Platform Architecture Overview")
-add_p("MedVision AI is structured as a modular Clinical Decision Support Platform. The application integrates six functional modules into a cohesive 4-tab Streamlit interface (app/app.py):")
-add_p("• Module 1 — Medical Image Management: Supports DICOM (.dcm), PNG, JPEG formats with CLAHE contrast enhancement and patient metadata entry.")
-add_p("• Module 2 — AI Diagnosis Engine: Executes PyTorch inference across ResNet-18, DenseNet-121, and EfficientNet-B0 backbones.")
-add_p("• Module 3 — Explainable AI (Grad-CAM): Computes spatial attention maps over target convolutional layers (denseblock4).")
-add_p("• Module 4 — Clinical Decision Support Layer: Merges AI probabilities with patient vitals (SpO2, Temp, Symptoms) to assign priority triage alerts (RED / YELLOW / GREEN).")
-add_p("• Module 5 — Automated PDF Report Generator: Exports printable diagnostic summary reports (app/report.py) with physician sign-off blocks.")
-add_p("• Module 6 — Hospital Analytics & Research Dashboard: Displays interactive Plotly population charts, model performance comparison tables, and error analysis cases.")
+        out_path = OUT_DIR / "Phase_1_Progress_Report_EN.docx"
+        doc.save(str(out_path))
+        print(f"[SUCCESS] Exported English Progress Report 1 to: {out_path}")
 
-# =========================================================
-# SECTION 5: EMPIRICAL BENCHMARK RESULTS
-# =========================================================
-add_heading_1("5. Empirical Benchmark Results and Analysis")
+create_word_report("VN")
+create_word_report("EN")
 
-add_heading_2("5.1 Quantitative Multi-Backbone Benchmarks")
-add_p("Deep learning backbones were evaluated across three random seeds (42, 7, 123) with 15 training epochs per run under identical hyperparameters (AdamW, lr = 1e-4, cosine scheduling, weighted random sampling). Results report mean +/- std:")
-
-add_table_grid(
-    ["Model Architecture", "Internal Accuracy", "Precision (Macro)", "Recall (Macro)", "F1 Score (Macro)", "Macro AUC"],
-    [
-        ["ResNet-18", "0.8498 ± 0.0033", "0.8358 ± 0.0041", "0.8489 ± 0.0054", "**0.8409 ± 0.0022**", "**0.9538 ± 0.0020**"],
-        ["DenseNet-121", "0.8455 ± 0.0022", "0.8349 ± 0.0115", "0.8328 ± 0.0086", "0.8322 ± 0.0055", "0.9512 ± 0.0024"],
-        ["EfficientNet-B0", "0.8383 ± 0.0091", "0.8306 ± 0.0108", "0.8248 ± 0.0070", "0.8269 ± 0.0088", "0.9493 ± 0.0015"],
-        ["HOG + SVM Baseline", "0.8351", "0.8098", "0.7833", "0.7940", "0.9470"]
-    ],
-    [1.5, 1.0, 1.0, 1.0, 1.0, 1.0],
-    "Table 5.1: Internal Test Set performance metrics (934 scans, patient-level split)."
-)
-
-add_heading_2("5.2 External Out-of-Distribution Validation (Montgomery Site)")
-add_p("To measure true model generalization, models were evaluated on the 100% held-out Montgomery County external test set (414 unseen adult scans):")
-
-add_figure(chart2_path, "Figure 5.1: Internal Test Macro AUC vs. External Montgomery Out-of-Distribution Macro AUC across model backbones.")
-
-add_table_grid(
-    ["Model Architecture", "External Accuracy", "Precision (Macro)", "Recall (Macro)", "F1 Score (Macro)", "External Macro AUC"],
-    [
-        ["DenseNet-121", "0.6860 ± 0.0723", "0.4083 ± 0.0175", "0.3310 ± 0.0373", "**0.3575 ± 0.0293**", "**0.8296 ± 0.0613**"],
-        ["ResNet-18", "0.6932 ± 0.0304", "0.3798 ± 0.0126", "0.3361 ± 0.0119", "0.3535 ± 0.0100", "0.7606 ± 0.0072"],
-        ["EfficientNet-B0", "0.5411 ± 0.0616", "0.4245 ± 0.0092", "0.2495 ± 0.0284", "0.2836 ± 0.0200", "0.7208 ± 0.0360"],
-        ["HOG + SVM Baseline", "0.1087 (Collapse)", "0.1724", "0.0625", "0.0917", "0.6052 (Poor)"]
-    ],
-    [1.5, 1.0, 1.0, 1.0, 1.0, 1.0],
-    "Table 5.2: External Test Set performance metrics on held-out Montgomery County site."
-)
-
-add_heading_2("5.3 Critical Experimental Findings")
-add_p("1. Deep Learning vs Classical ML: While handcrafted HOG+SVM features achieve reasonable internal accuracy (83.51%), they suffer catastrophic collapse (10.87% accuracy, 0.6052 AUC) when evaluated on external adult scans. Deep CNN backbones maintain high discriminative capacity (DenseNet-121 External AUC: 0.8296).")
-add_p("2. Superior Dense Connectivity: DenseNet-121 demonstrated superior feature preservation across cross-institutional scanner shifts due to feature reuse across dense blocks.")
-
-# =========================================================
-# SECTION 6: ADVANCED FUTURE EXTENSIONS
-# =========================================================
-add_heading_1("6. Advanced Multimodal & Clinical Extensions Vision")
-add_p("To expand MedVision AI beyond multi-class screening, future development will integrate:")
-add_p("1. Preliminary AI Radiology Draft Findings Generator: Coupling vision backbone embeddings with LLMs to generate structured text summaries for radiologist review.")
-add_p("2. Medical Visual Question Answering (VQA): Conversational prompt interface enabling clinicians to query specific lung zones against datasets such as MIMIC-CXR-VQA.")
-add_p("3. Multi-Label Pathology Expansion: Extending detection to 14 radiological findings (Cardiomegaly, Effusion, Atelectasis, Pneumothorax).")
-
-# =========================================================
-# SECTION 7: SUMMARY OF PROGRESS & NEXT STEPS
-# =========================================================
-add_heading_1("7. Summary of Completed Progress and Next Steps")
-add_p("All core milestones for Progress Report 1 have been successfully completed, verified via automated audit scripts, and committed to Git (commit 9949964 / ab13793).")
-
-# =========================================================
-# SECTION 8: BIBLIOGRAPHY & REFERENCES
-# =========================================================
-add_heading_1("8. Bibliography and Academic References")
-add_p("<u>Candemir, S., Jaeger, S., Palaniappan, K., Musco, J. P., Singh, R. K., Xue, Z., & Thoma, G. R.</u> (2014). Lung segmentation in chest radiographs using anatomical atlases. IEEE Transactions on Medical Imaging, 33(2), 577-590.")
-add_p("<u>He, K., Zhang, X., Ren, S., & Sun, J.</u> (2016). Deep residual learning for image recognition. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) (pp. 770-778).")
-add_p("<u>Huang, G., Liu, Z., Van Der Maaten, L., & Weinberger, K. Q.</u> (2017). Densely connected convolutional networks. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) (pp. 4700-4708).")
-add_p("<u>Jaeger, S., Candemir, S., Antani, S., Wáng, Y. X. J., Lu, PX., & Thoma, G.</u> (2014). Two public chest X-ray datasets for computer-aided screening of pulmonary diseases. Quantitative Imaging in Medicine and Surgery, 4(6), 475-477.")
-add_p("<u>Kermany, D. S., Goldbaum, M., Zhang, W., et al.</u> (2018). Identifying medical diagnoses and treating diseases by image-based deep learning. Cell, 172(5), 1122-1131.")
-add_p("<u>Selvaraju, R. R., Cogswell, M., Das, A., Vedantam, R., Parikh, D., & Batra, D.</u> (2017). Grad-CAM: Visual explanations from deep networks via gradient-based localization. In IEEE International Conference on Computer Vision (ICCV) (pp. 618-626).")
-add_p("<u>Tan, M., & Le, Q.</u> (2019). EfficientNet: Rethinking model scaling for convolutional neural networks. International Conference on Machine Learning (ICML) (pp. 6105-6114).")
-add_p("<u>Wang, X., Peng, Y., Lu, L., Lu, Z., Bagheri, M., & Summers, R. M.</u> (2022). ChestX-ray8: Hospital-scale chest X-ray database and benchmarks. IEEE CVPR (pp. 2097-2106).")
-
-# Save Word Document
-report_path_1 = OUT_DIR / "Bao_Cao_Tien_Do_Dot_1.docx"
-report_path_2 = OUT_DIR / "Phase_1_Progress_Report.docx"
-
-doc.save(str(report_path_1))
-doc.save(str(report_path_2))
-
-print(f"[SUCCESS] Exported Progress Report 1 Word Documents to:")
-print(f"  1. {report_path_1}")
-print(f"  2. {report_path_2}")
+print("\n========================================================")
+print("  [SUCCESS] ALL EN & VN PROGRESS REPORTS AND CHARTS BUILT")
+print("========================================================\n")
