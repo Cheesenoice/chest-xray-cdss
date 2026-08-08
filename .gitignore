@@ -20,11 +20,9 @@ data/processed/*
 !data/processed/splits_kermany3/*.csv
 !data/processed/splits_kermany3/split_report.md
 
-# Model checkpoints and large result artifacts
-results/checkpoints/
-*.pt
-*.pth
-*.ckpt
+# Model checkpoints (tracked so demo runs immediately)
+!results/checkpoints/
+!results/checkpoints/*.pt
 
 # Jupyter
 .ipynb_checkpoints/
