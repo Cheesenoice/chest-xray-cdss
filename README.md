@@ -18,34 +18,37 @@ A **reproducible benchmark** comparing multiple deep learning backbones (ResNet-
 
 ## Quick Start
 
+### Option A: Run Interactive Web Demo Immediately (Pre-trained Weights Included)
 ```bash
-# 1. Clone and enter repo
-git clone <repo-url>
+# 1. Clone repo
+git clone https://github.com/Cheesenoice/chest-xray-cdss.git
 cd chest-xray-cdss
 
-# 2. Install dependencies (CUDA 12.8 for RTX 50-series)
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Download data
+# 3. Launch Web App Demo (Pre-trained weights included!)
+streamlit run app/app.py
+```
+
+### Option B: Download Datasets & Reproduce Experiments from Scratch
+```bash
+# 1. Download datasets (Automated via Kaggle API / kagglehub)
 python -m src.data.download
 
-# 4. Prepare manifest + split (patient-level, zero leakage)
+# 2. Prepare manifest & execute zero-leakage patient-level split
 python -m src.data.prepare
 python -m src.data.split
 python -m src.data.checks
 
-# 5. Train a baseline model
-python -m src.train --config configs/default.yaml
+# 3. Run Scientific Audit Verification (100% Zero Leakage Test)
+python -m src.audit_pipeline
 
-# 6. Evaluate
-python -m src.evaluate --config configs/default.yaml
+# 4. Run Classical ML Baseline (HOG + SVM)
+python -m src.baseline_classical
 
-# 7. Run all experiments (3 backbones × 3 seeds)
-python -m experiments.run_all
-
-# 8. Launch demo
-streamlit run app/app.py
+# 5. Run Deep Learning Multi-Backbone Benchmark (ResNet18, DenseNet121, EfficientNetB0 x 3 seeds)
+python -m experiments.run_all --config configs/default.yaml --epochs 15
 ```
 
 ## Project Structure
