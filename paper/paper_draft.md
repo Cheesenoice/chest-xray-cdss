@@ -103,8 +103,21 @@ The system provides a triaged decision workflow: High-risk predictions (Tubercul
 ### 4.2 Domain Confound Disclosure
 A notable scientific limitation is the domain shift between Kermany (pediatric Guangzhou cohort) and Shenzhen/Montgomery (adult cohort). In 4-class configurations, classifiers may leverage age-related anatomical features to distinguish Tuberculosis. We explicitly highlight this domain confound as a limitation and advocate for multi-center pediatric TB data collection.
 
+### 4.3 Clinical Decision Support Platform Integration
+To bridge the gap between machine learning research and clinical deployment, we developed **MedVision AI**, a production-grade web application (`app/app.py`). The platform integrates:
+- **Medical Image Ingestion:** Native parsing of DICOM (`.dcm`), PNG, and JPEG formats using `pydicom`.
+- **Adaptive Contrast Enhancement:** Contrast Limited Adaptive Histogram Equalization (CLAHE) to assist clinicians in inspecting subtle pulmonary opacities.
+- **Triage Priority Escalation:** Automated classification into high-risk red alerts (Tuberculosis, Bacterial Pneumonia requiring urgent radiologist referral), yellow alerts (Viral Pneumonia), and green low-risk status.
+- **Automated Diagnostic Reporting:** One-click PDF report generation (`app/report.py`) compiling patient metadata, differential class probabilities, visual Grad-CAM heatmaps, and attending physician sign-off blocks.
+
+### 4.4 Future Multimodal & Visual Question Answering (VQA) Extensions
+While the current CDSS focuses on multi-class pathology classification and Grad-CAM localization, the underlying platform architecture is designed to support multimodal extensions:
+1. **Automated Preliminary Radiology Findings:** Coupling vision backbone embeddings with Large Language Models (LLMs) to generate structured preliminary draft findings (e.g., *"Possible focal consolidation in lower right lung field consistent with bacterial pneumonia"*).
+2. **Medical Visual Question Answering (VQA):** Enabling conversational visual QA interfaces (e.g., *"Which lung region contains the primary infiltrate?"*) evaluated against open datasets such as MIMIC-CXR-VQA.
+3. **Multi-Label Expansion:** Extending from 4-class single-label categorization to multi-label abnormality detection (Cardiomegaly, Pleural Effusion, Pneumothorax, Edema).
+
 ---
 
 ## 5. Conclusion & Reproducibility Statement
 
-This study presents a rigorous benchmark for chest X-ray classification with strict patient-level splitting, external validation, and visual explainability. All code, model checkpoints, and configuration files are publicly available at `Cheesenoice/chest-xray-cdss`.
+This study presents **MedVision AI**, a rigorous, explainable, and production-grade Clinical Decision Support Platform for chest X-ray screening. By combining patient-level zero-leakage data partitioning, out-of-distribution external site validation, Grad-CAM visual heatmaps, classical ML comparisons, and automated PDF reporting, this work establishes a comprehensive framework for transparent AI adoption in radiology. All code, model checkpoints, and configuration files are publicly available at `Cheesenoice/chest-xray-cdss`.

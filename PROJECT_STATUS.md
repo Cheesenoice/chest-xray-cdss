@@ -9,30 +9,29 @@ Last updated: **2026-07-31**
 
 ## Project Overview
 
-**Title:** Explainable Deep Learning CDSS for Chest X-ray Screening
+**Title:** MedVision AI: An Explainable Deep Learning Clinical Decision Support Platform for Chest X-Ray Screening
 
-**Goal:** Reproducible multi-class benchmark (Normal / Bacterial / Viral [+ TB optional]) comparing ResNet-18, DenseNet-121, EfficientNet-B0 with:
-- Zero-leakage patient-level splits
-- Grad-CAM explainability
-- External held-out validation (Montgomery TB dataset)
-- Classical ML baseline (HOG/LBP + SVM) for comparison
-- Web demo (Streamlit) + PDF report
-- IMRaD paper + preprint
-
-**Datasets:** Kermany (pediatric pneumonia, CC BY 4.0), Shenzhen/Montgomery (adult TB, public domain)
-
-**Hardware:** NVIDIA RTX 5050 Laptop GPU (6GB), CUDA 12.8 build
+**Goal:** Production-grade Clinical Decision Support Platform + Reproducible multi-class benchmark (`Normal`, `Bacterial Pneumonia`, `Viral Pneumonia`, `Tuberculosis`) comparing `ResNet-18`, `DenseNet-121`, `EfficientNet-B0` vs. Classical `HOG+SVM` baseline with:
+- Zero-leakage patient-level splits (`GroupShuffleSplit` on `patient_id`)
+- 100% Held-Out External Site Validation (Montgomery County, USA)
+- Grad-CAM pathological heatmap localization (`denseblock4`)
+- Patient Vitals & Clinical Risk Triage Engine (SpO2, Temp, Dyspnea, Priority Alert)
+- Automated 1-Click PDF Diagnostic Report Export (`app/report.py`)
+- Preliminary AI Radiology Draft Findings Generator
+- Interactive Streamlit 4-Tab Web Application (`app/app.py`) + Plotly Analytics
+- IMRaD Preprint Paper (`paper/paper_draft.md`) + Model Card (`model_card.md`)
 
 ---
 
 ## 4-Week Roadmap
 
-| Phase | Milestone | Status |
-|-------|-----------|--------|
-| **Week 1** | Data pipeline + repo hygiene + first baseline | ✅ Complete |
-| **Week 2** | Full benchmark (3 backbone × 3 seed) + explainability | 🔴 In progress |
-| **Week 3** | External validation + demo product + deploy | ⏳ Pending |
-| **Week 4** | Paper writing + preprint + defense slides | ⏳ Pending |
+| Phase | Milestone | Status | Output / Artifacts |
+|---|---|---|---|
+| **Phase 1** | Data pipeline + Patient-level split + EDA | ✅ Complete | `manifest.csv`, `split_report.md`, `01_eda_kermany.ipynb`, `02_eda_pulmonary.ipynb` |
+| **Phase 2** | Classical ML Baseline + Multi-backbone Benchmark (3 seeds) + Grad-CAM | ✅ Complete | `classical_baseline.md` (Acc: 83.51% int / 10.87% ext), `benchmark_summary.md`, `gradcam_gallery.png` |
+| **Phase 3** | Clinical Decision Support Layer + 4-Tab Web App + PDF Report | ✅ Complete | `app/app.py` (DICOM, CLAHE, Triage, Plotly), `app/report.py` (PDF Report) |
+| **Phase 4** | Scientific Integrity Audit + Paper Manuscript + Defense Presentation | ✅ Complete | `src/audit_pipeline.py` (100% PASS), `paper/paper_draft.md`, `model_card.md` |
+| **Phase 5 (Advanced)** | LLM Radiology Draft Findings + VQA / Error Analysis Extension | 💡 Future Vision | Pre-formulated radiology draft findings, Medical VQA concept framework |
 
 ---
 
