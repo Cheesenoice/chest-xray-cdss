@@ -115,9 +115,19 @@ def main():
 
             image = None
             if input_mode == "Upload Custom File":
-                uploaded_file = st.file_uploader("Upload DICOM/JPEG/PNG...", type=["jpeg", "jpg", "png"])
+                uploaded_file = st.file_uploader("Upload DICOM/JPEG/PNG...", type=["jpeg", "jpg", "png", "dcm"])
                 if uploaded_file is not None:
-                    image = Image.open(uploaded_file).convert("RGB")
+                    if uploaded_file.name.lower().endswith(".dcm"):
+                        try:
+                            import pydicom
+                            dcm = pydicom.dcmread(uploaded_file)
+                            pix = dcm.pixel_array
+                            pix = ((pix - pix.min()) / (pix.max() - pix.min() + 1e-5) * 255.0).astype(np.uint8)
+                            image = Image.fromarray(cv2.cvtColor(pix, cv2.COLOR_GRAY2RGB))
+                        except Exception as e:
+                            st.error(f"Error reading DICOM file: {e}")
+                    else:
+                        image = Image.open(uploaded_file).convert("RGB")
             else:
                 test_csv = Path("data/processed/splits/test.csv")
                 if test_csv.exists():
